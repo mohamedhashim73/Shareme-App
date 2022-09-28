@@ -12,13 +12,19 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<LayoutCubit,LayoutStates>(
-        listener: (context,state){},
+        listener: (context,state){
+          if( state is GetPostsDataForAllUsersSuccessState )
+            {
+              print("###################### Users Posts length is ${state.usersPostsLength.toString()} #####################");
+            }
+        },
         builder: (context,state){
           final cubit = LayoutCubit.getCubit(context);
-          return Scaffold(
+          if( state is UploadPostWithoutImageSuccessState ) cubit.postImageFile = null;   // as after choose one and return to add another post will not found the last one
+            return Scaffold(
             backgroundColor: whiteColor,
             appBar: AppBar(leading: const Text(""),leadingWidth: 0,title: const Text("Feed"),toolbarHeight: 45,),
-            body: cubit.posts.isEmpty ?  // mean that there is no posts on FireStore especially ( posts collection )
+            body: cubit.allUsersPosts.isEmpty?  // mean that there is no posts for all users on FireStore
                 const Center(child: CupertinoActivityIndicator(color: mainColor,),) :
                 SizedBox(
                   height: double.infinity,
@@ -33,12 +39,12 @@ class HomeScreen extends StatelessWidget {
                           physics: const NeverScrollableScrollPhysics(),
                           shrinkWrap: true,
                             itemBuilder: (context,i){
-                              return buildPostItem(context: context, cubit: cubit,model: cubit.posts[i]);
+                              return buildPostItem(context: context, cubit: cubit,model: cubit.allUsersPosts[i]);
                             },
                             separatorBuilder: (context,i){
                             return const Divider(thickness: 1,height: 3,);
                             },
-                            itemCount: cubit.posts.length
+                            itemCount: cubit.allUsersPosts.length,
                         ),
                       ],
                     ),
@@ -68,7 +74,7 @@ class HomeScreen extends StatelessWidget {
                   ),
                   CircleAvatar(
                     radius: 20,
-                    backgroundImage: NetworkImage(cubit.userData!.image!),
+                    backgroundImage: NetworkImage(model.userImage!),
                   ),
                 ],
               ),
@@ -78,7 +84,7 @@ class HomeScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // const SizedBox(height: 2.5,),
-                  Text(cubit.userData!.userName!,style: const TextStyle(fontSize: 16),),   // if user change userName , it will be shown but if shown the value that store on postData there will be difference
+                  Text(model.userName!,style: const TextStyle(fontSize: 16),),   // if user change userName , it will be shown but if shown the value that store on postData there will be difference
                   const SizedBox(height: 2,),
                   Text(model.postDate!,style: Theme.of(context).textTheme.caption,),
                 ],
@@ -93,8 +99,8 @@ class HomeScreen extends StatelessWidget {
         if( model.postCaption != '' )
         Container(
           color: model.postImage == '' ? Colors.white.withOpacity(0.2) : whiteColor,
-          padding : const EdgeInsets.symmetric(horizontal: 12.0),
-          child: Text(model.postCaption!,style: model.postImage == '' ? const TextStyle(fontWeight: FontWeight.w400,fontSize: 16) : const TextStyle()),
+          padding : const EdgeInsets.symmetric(horizontal: 12.0,vertical: 5),
+          child: Text(model.postCaption!,style: model.postImage == '' ? const TextStyle(fontWeight: FontWeight.w400,fontSize: 17.5) : const TextStyle()),
         ),
         if( model.postImage != '' )   // as if image not exist postImage on fireStore will have '' value
         const SizedBox(height: 10,),

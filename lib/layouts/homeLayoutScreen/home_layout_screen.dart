@@ -20,7 +20,7 @@ class HomeLayoutScreen extends StatelessWidget {
               const BottomNavigationBarItem(icon: Icon(Icons.home),label: 'null'),
               const BottomNavigationBarItem(icon: Icon(Icons.search),label: 'null'),
               const BottomNavigationBarItem(icon: CircleAvatar(maxRadius: 18,child: Icon(Icons.add,),),label: 'null'),
-              const BottomNavigationBarItem(icon: Icon(Icons.settings),label: 'null'),
+              const BottomNavigationBarItem(icon: Icon(Icons.messenger_outline),label: 'null'),
               BottomNavigationBarItem(icon: CircleAvatar(radius:15.0,backgroundImage: NetworkImage(cubit.userData?.image.toString()?? defaultUserImage)),label: 'null'),
             ],
             currentIndex: cubit.bottomNavIndex,

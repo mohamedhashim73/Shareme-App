@@ -109,9 +109,11 @@ class LoginScreen extends StatelessWidget {
                             const Text("Don't have an account?..."),
                             defaultTextButton(
                                 title: const Text("Sign Up",style: TextStyle(fontWeight:FontWeight.bold,fontSize:15,color: mainColor),),
-                                onTap: (){
+                                onTap: ()
+                                {
                                   Navigator.push(context, MaterialPageRoute(builder: (context)=>RegisterScreen()));
-                                }),
+                                }
+                                ),
                           ],
                         )
                       ],

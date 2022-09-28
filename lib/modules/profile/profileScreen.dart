@@ -5,6 +5,7 @@ import 'package:social_app/layouts/cubit/layoutStates.dart';
 import 'package:social_app/models/post_Data_Model.dart';
 import 'package:social_app/shared/components/components.dart';
 import 'package:social_app/shared/components/constants.dart';
+import 'package:social_app/shared/network/local/cacheHelper.dart';
 import 'package:social_app/shared/styles/colors.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -31,7 +32,8 @@ class ProfileScreen extends StatelessWidget {
                           const Icon(Icons.arrow_drop_down_sharp)
                         ],
                       ),
-                      onTap: (){
+                      onTap: ()
+                      {
                         // here should show bottomNavigationBar contain userName or login with another account
                       }
                   ),
@@ -119,12 +121,12 @@ class ProfileScreen extends StatelessWidget {
                         cubit.profileImageChosen?
                         // Put All Images for User :
                         GridView.builder(
-                            itemCount: cubit.posts.length,
+                            itemCount: cubit.userPosts.length,
                             physics: const NeverScrollableScrollPhysics(),
                             shrinkWrap: true,
                             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3,childAspectRatio: 0.8,mainAxisSpacing: 4,crossAxisSpacing: 7),
                             itemBuilder: (context,i){
-                              return buildPostsImagesShown(model: cubit.posts[i],context: context);
+                              return buildPostsImagesShown(model: cubit.userPosts[i],context: context);
                             }
                         ) :
                         // Put All Videos for User

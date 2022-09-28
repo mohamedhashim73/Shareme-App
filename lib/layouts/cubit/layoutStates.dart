@@ -10,6 +10,12 @@ class GetUserDataSuccessState extends LayoutStates{}
 
 class GetUserDataErrorState extends LayoutStates{}
 
+class GetAllUsersDataLoadingState extends LayoutStates{}
+
+class GetAllUsersDataSuccessState extends LayoutStates{}
+
+class GetAllUsersDataErrorState extends LayoutStates{}
+
 class GetProfileImageLoadingState extends LayoutStates{}
 
 class GetProfileImageSuccessState extends LayoutStates{}
@@ -53,9 +59,20 @@ class UploadImageForPostErrorState extends LayoutStates{}
 
 class CanceledImageForPostState extends LayoutStates{}
 
-class GetUserPostsDataLoadingState extends LayoutStates{}
+// for specific user
+class GetPostsDataForSpecificUserLoadingState extends LayoutStates{}
 
-class GetUserPostsDataSuccessState extends LayoutStates{}
+class GetPostsDataForSpecificUserSuccessState extends LayoutStates{}
 
-class GetUserPostsDataErrorState extends LayoutStates{}
+class GetPostsDataForSpecificUserErrorState extends LayoutStates{}
+
+ // for all users
+class GetPostsDataForAllUsersLoadingState extends LayoutStates{}
+
+class GetPostsDataForAllUsersSuccessState extends LayoutStates{
+  final int usersPostsLength;
+  GetPostsDataForAllUsersSuccessState(this.usersPostsLength);
+}
+
+class GetPostsDataForAllUsersErrorState extends LayoutStates{}
 
