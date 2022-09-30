@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:social_app/layouts/cubit/layoutCubit.dart';
-import 'package:social_app/layouts/cubit/layoutStates.dart';
 import 'package:social_app/models/user_data_model.dart';
+import '../../layouts/layoutCubit/layoutCubit.dart';
+import '../../layouts/layoutCubit/layoutStates.dart';
 import '../../shared/styles/colors.dart';
 class ChatScreen extends StatelessWidget {
   const ChatScreen({Key? key}) : super(key: key);

@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:social_app/layouts/cubit/layoutCubit.dart';
-import 'package:social_app/layouts/cubit/layoutStates.dart';
+import 'package:social_app/layouts/layoutCubit/layoutCubit.dart';
+import 'package:social_app/layouts/layoutCubit/layoutStates.dart';
 import 'package:social_app/models/post_Data_Model.dart';
 import 'package:social_app/shared/components/components.dart';
-import 'package:social_app/shared/components/constants.dart';
-import 'package:social_app/shared/network/local/cacheHelper.dart';
 import 'package:social_app/shared/styles/colors.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -76,7 +74,7 @@ class ProfileScreen extends StatelessWidget {
                           ],
                         ),
                         const SizedBox(height: 10,),
-                        Text(cubit.userData!.name.toString(),style: Theme.of(context).textTheme.bodyLarge!.copyWith(fontSize: 16),),
+                        Text(cubit.userData!.userName.toString(),style: Theme.of(context).textTheme.bodyLarge!.copyWith(fontSize: 16),),
                         const SizedBox(height: 2.5),
                         defaultTextButton(title: Text(cubit.userData!.bio!,overflow: TextOverflow.ellipsis,maxLines: 3,style: Theme.of(context).textTheme.caption!.copyWith(fontSize: 14)), onTap: (){}),
                         const SizedBox(height:5,),
@@ -121,12 +119,12 @@ class ProfileScreen extends StatelessWidget {
                         cubit.profileImageChosen?
                         // Put All Images for User :
                         GridView.builder(
-                            itemCount: cubit.userPosts.length,
+                            itemCount: cubit.userPostsData.length,
                             physics: const NeverScrollableScrollPhysics(),
                             shrinkWrap: true,
                             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3,childAspectRatio: 0.8,mainAxisSpacing: 4,crossAxisSpacing: 7),
                             itemBuilder: (context,i){
-                              return buildPostsImagesShown(model: cubit.userPosts[i],context: context);
+                              return buildPostsImagesShown(model: cubit.userPostsData[i],context: context);
                             }
                         ) :
                         // Put All Videos for User

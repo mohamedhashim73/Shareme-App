@@ -1,10 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:social_app/layouts/cubit/layoutCubit.dart';
-import 'package:social_app/layouts/cubit/layoutStates.dart';
 import 'package:social_app/shared/components/constants.dart';
 import 'package:social_app/shared/styles/colors.dart';
+import '../../layouts/layoutCubit/layoutCubit.dart';
+import '../../layouts/layoutCubit/layoutStates.dart';
 import '../../shared/components/components.dart';
 
 class CreatePostScreen extends StatelessWidget {
@@ -19,6 +19,7 @@ class CreatePostScreen extends StatelessWidget {
           {
             showSnackBar(message: "Post Uploaded successfully!", context: context, color: Colors.grey);
             Navigator.pushReplacementNamed(context, 'homeLayoutScreen');
+            LayoutCubit.getCubit(context).postImageFile = null ;
           }
         },
         builder: (context,state){

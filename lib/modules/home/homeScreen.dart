@@ -1,8 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:social_app/layouts/cubit/layoutCubit.dart';
-import 'package:social_app/layouts/cubit/layoutStates.dart';
+import 'package:social_app/layouts/layoutCubit/layoutCubit.dart';
+import 'package:social_app/layouts/layoutCubit/layoutStates.dart';
 import 'package:social_app/models/post_Data_Model.dart';
 import 'package:social_app/shared/components/constants.dart';
 import 'package:social_app/shared/styles/colors.dart';
@@ -11,20 +11,18 @@ class HomeScreen extends StatelessWidget {
   const HomeScreen({Key? key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<LayoutCubit,LayoutStates>(
-        listener: (context,state){
-          if( state is GetPostsDataForAllUsersSuccessState )
-            {
-              print("###################### Users Posts length is ${state.usersPostsLength.toString()} #####################");
-            }
-        },
-        builder: (context,state){
-          final cubit = LayoutCubit.getCubit(context);
-          if( state is UploadPostWithoutImageSuccessState ) cubit.postImageFile = null;   // as after choose one and return to add another post will not found the last one
-            return Scaffold(
-            backgroundColor: whiteColor,
-            appBar: AppBar(leading: const Text(""),leadingWidth: 0,title: const Text("Feed"),toolbarHeight: 45,),
-            body: cubit.allUsersPosts.isEmpty?  // mean that there is no posts for all users on FireStore
+    return Builder(
+      builder: (BuildContext context){
+        // call getPostsForAllUsers for first time i open this screen
+        LayoutCubit.getCubit(context).getPostsForAllUsers();
+        return BlocConsumer<LayoutCubit,LayoutStates>(
+            listener: (context,state){},
+            builder: (context,state){
+              final cubit = LayoutCubit.getCubit(context);
+              return Scaffold(
+                backgroundColor: whiteColor,
+                appBar: AppBar(leading: const Text(""),leadingWidth: 0,title: const Text("Feed"),toolbarHeight: 45,),
+                body: state is GetPostsDataForAllUsersLoadingState ?  // mean that there is no posts for all users on FireStore
                 const Center(child: CupertinoActivityIndicator(color: mainColor,),) :
                 SizedBox(
                   height: double.infinity,
@@ -38,20 +36,22 @@ class HomeScreen extends StatelessWidget {
                         ListView.separated(
                           physics: const NeverScrollableScrollPhysics(),
                           shrinkWrap: true,
-                            itemBuilder: (context,i){
-                              return buildPostItem(context: context, cubit: cubit,model: cubit.allUsersPosts[i]);
-                            },
-                            separatorBuilder: (context,i){
+                          itemBuilder: (context,i){
+                            return buildPostItem(context: context, cubit: cubit,model: cubit.usersPostsData[i]);
+                          },
+                          separatorBuilder: (context,i){
                             return const Divider(thickness: 1,height: 3,);
-                            },
-                            itemCount: cubit.allUsersPosts.length,
+                          },
+                          itemCount: cubit.usersPostsData.length,
                         ),
                       ],
                     ),
                   ),
                 ),
-          );
-        }
+              );
+            }
+        );
+      },
     );
   }
 

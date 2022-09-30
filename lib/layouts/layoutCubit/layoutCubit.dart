@@ -4,7 +4,6 @@ import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:social_app/layouts/cubit/layoutStates.dart';
 import 'package:social_app/models/post_Data_Model.dart';
 import 'package:social_app/models/user_data_model.dart';
 import 'package:social_app/modules/home/homeScreen.dart';
@@ -15,6 +14,7 @@ import 'dart:io';
 import 'package:social_app/shared/network/local/cacheHelper.dart';
 
 import '../../modules/chat/chatScreen.dart';
+import 'layoutStates.dart';
 
 class LayoutCubit extends Cubit<LayoutStates>{
   LayoutCubit() : super(InitialLayoutState());
@@ -44,7 +44,7 @@ class LayoutCubit extends Cubit<LayoutStates>{
     emit(GetUserDataLoadingState());
     FirebaseFirestore.instance.collection("users").doc(userID?? CacheHelper.getCacheData(key: 'uid')).get().then((value){
       userData = UserDataModel.fromJson(value.data()!);
-      print("User Id after adding to Model is ${userData!.name}");
+      print("User Id after adding to Model is ${userData!.userName}");
       emit(GetUserDataSuccessState());
     }).catchError((e){
       print("Error during Getting User data is ${e.toString()}");
@@ -88,10 +88,10 @@ class LayoutCubit extends Cubit<LayoutStates>{
     }
   }
 
-  void updateUserDataWithoutImage({required String name,required String email,required String bio,required String userName,String? image}){
+  void updateUserDataWithoutImage({required String email,required String bio,required String userName,String? image}){
     emit(UpdateUserDataWithoutImageLoadingState());
-    final model = UserDataModel(name: name,image: image?? userData!.image,email: email,bio: bio,userName: userName,uid: userData!.uid);
-    FirebaseFirestore.instance.collection('users').doc(userData!.uid)
+    final model = UserDataModel(image: image?? userData!.image,email: email,bio: bio,userName: userName,userID: userData!.userID);
+    FirebaseFirestore.instance.collection('users').doc(userData!.userID)
     .update(model.toJson())
     .then((value){
       getUserData();
@@ -99,14 +99,14 @@ class LayoutCubit extends Cubit<LayoutStates>{
     }).catchError((e)=>emit(UpdateUserDataWithoutImageErrorState()));
   }
 
-  void updateUserDataWithImage({required String name,required String email,required String bio,required String userName}){
+  void updateUserDataWithImage({required String email,required String bio,required String userName}){
     emit(UpdateUserDataWithImageLoadingState());
     firebase_storage.FirebaseStorage.instance.ref().child("users/${Uri.file(userImageFile!.path).pathSegments.last}")
     .putFile(userImageFile!)
     .then((val){
       val.ref.getDownloadURL().then((imageUrl){
         // upload Update for userData to FireStore
-        updateUserDataWithoutImage(name: name, email: email, bio: bio, userName: userName,image: imageUrl);
+        updateUserDataWithoutImage(email: email, bio: bio, userName: userName,image: imageUrl);
       }).catchError((onError)=>emit(UploadUserImageErrorState()));
     })
     .catchError((error){emit(UpdateUserDataWithImageErrorState());});
@@ -134,8 +134,8 @@ class LayoutCubit extends Cubit<LayoutStates>{
 
   void createPostWithoutImage({required String postCaption,String? postImage}){
     emit(UploadPostWithoutImageLoadingState()); // loading
-    final model = PostDataModel(userData!.userName, userData!.uid, userData!.image,postCaption,timeNow.toString(),postImage?? "");
-    FirebaseFirestore.instance.collection('users').doc(userData!.uid).collection('posts')
+    final model = PostDataModel(userData!.userName, userData!.userID, userData!.image,postCaption,timeNow.toString(),postImage?? "");
+    FirebaseFirestore.instance.collection('users').doc(userData!.userID).collection('posts')
         .add(model.toJson()).then((value){
       // here must write getPostsData as if there is an update
       getPostsForUser();   // as there is update on Posts
@@ -168,33 +168,34 @@ class LayoutCubit extends Cubit<LayoutStates>{
     emit(CanceledImageForPostState());
   }
 
-  List<PostDataModel> userPosts = [];    // as i send data as PostDataModel to FireStore
+  // get posts for specific user to show on profile screen
+  List<PostDataModel> userPostsData = [];    // as i send data as PostDataModel to FireStore
   void getPostsForUser(){
-    userPosts = [];
+    userPostsData = [];
     emit(GetPostsDataForSpecificUserLoadingState());
-    FirebaseFirestore.instance..collection('users').doc(CacheHelper.getCacheData(key: 'uid')??userData!.uid).collection('posts').get()
+    FirebaseFirestore.instance.collection('users').doc(CacheHelper.getCacheData(key: 'uid')??userData!.userID).collection('posts').get()
     .then((value){
       value.docs.forEach((element) {
-        userPosts.add(PostDataModel.fromJson(json: element.data()));
+        userPostsData.add(PostDataModel.fromJson(json: element.data()));
         emit(GetUserDataSuccessState());
       });
     }).catchError((error)=>emit(GetPostsDataForSpecificUserErrorState()));
   }
 
   // get posts for all users to display on homeScreen
-  List<PostDataModel> allUsersPosts = [];    // as i send data as PostDataModel to FireStore
+  List<PostDataModel> usersPostsData = [];    // as i send data as PostDataModel to FireStore
   void getPostsForAllUsers(){
-    allUsersPosts = [];
+    usersPostsData = [];
     emit(GetPostsDataForAllUsersLoadingState());
     FirebaseFirestore.instance.collection('users').get().then((value){
       value.docs.forEach((element) {
         element.reference.collection('posts').get().then((val){
           // get posts for every user
           val.docs.forEach((postData) {
-            allUsersPosts.add(PostDataModel.fromJson(json: postData.data()));
+            usersPostsData.add(PostDataModel.fromJson(json: postData.data()));
           });
         });
-        emit(GetPostsDataForAllUsersSuccessState(allUsersPosts.length));
+        emit(GetPostsDataForAllUsersSuccessState(usersPostsData.length));
       });
     }).catchError((error){print(error.toString());emit(GetPostsDataForAllUsersErrorState());});
   }

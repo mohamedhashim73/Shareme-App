@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:social_app/layouts/cubit/layoutCubit.dart';
-import 'package:social_app/layouts/cubit/layoutStates.dart';
+import 'package:social_app/layouts/layoutCubit/layoutCubit.dart';
+import 'package:social_app/layouts/layoutCubit/layoutStates.dart';
 class SearchScreen extends StatelessWidget {
   const SearchScreen({Key? key}) : super(key: key);
   @override

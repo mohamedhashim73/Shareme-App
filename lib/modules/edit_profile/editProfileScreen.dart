@@ -1,15 +1,14 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:social_app/layouts/cubit/layoutCubit.dart';
-import 'package:social_app/layouts/cubit/layoutStates.dart';
+import 'package:social_app/layouts/layoutCubit/layoutCubit.dart';
+import 'package:social_app/layouts/layoutCubit/layoutStates.dart';
 import 'package:social_app/shared/components/components.dart';
 import 'package:social_app/shared/styles/colors.dart';
 
 class EditProfileScreen extends StatelessWidget {
   final emailController = TextEditingController();
   final bioController = TextEditingController();
-  final nameController = TextEditingController();
   final userNameController = TextEditingController();
   final formKey = GlobalKey<FormState>();
 
@@ -28,7 +27,6 @@ class EditProfileScreen extends StatelessWidget {
         builder: (context,state){
           final cubit = LayoutCubit.getCubit(context);
           emailController.text = cubit.userData!.email!;
-          nameController.text = cubit.userData!.name!;
           userNameController.text = cubit.userData!.userName!;
           bioController.text = cubit.userData!.bio!;
           return Scaffold(
@@ -53,11 +51,11 @@ class EditProfileScreen extends StatelessWidget {
                       {
                         if( cubit.userImageFile != null )
                         {
-                          cubit.updateUserDataWithImage(name: nameController.text,userName: userNameController.text,email: emailController.text,bio: bioController.text);
+                          cubit.updateUserDataWithImage(userName: userNameController.text,email: emailController.text,bio: bioController.text);
                         }
                         else
                         {
-                          cubit.updateUserDataWithoutImage(name: nameController.text,userName: userNameController.text,email: emailController.text,bio: bioController.text);
+                          cubit.updateUserDataWithoutImage(userName: userNameController.text,email: emailController.text,bio: bioController.text);
                         }
                       },
                       child: const Icon(Icons.done),),
@@ -107,16 +105,6 @@ class EditProfileScreen extends StatelessWidget {
                             validator: (val)
                             {
                               return emailController.text.isEmpty ? "UserName must not be empty" : null ;
-                            }
-                        ),
-                        const SizedBox(height: 20,),
-                        specificTextFormField(
-                          label: "Name",
-                            inputType: TextInputType.name,
-                            controller: nameController,
-                            validator: (val)
-                            {
-                              return emailController.text.isEmpty ? "Name must not be empty" : null ;
                             }
                         ),
                         const SizedBox(height: 20,),

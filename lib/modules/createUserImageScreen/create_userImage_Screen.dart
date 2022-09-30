@@ -1,12 +1,13 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:social_app/layouts/cubit/layoutCubit.dart';
-import 'package:social_app/layouts/cubit/layoutStates.dart';
+import 'package:social_app/layouts/layoutCubit/layoutCubit.dart';
+import 'package:social_app/layouts/layoutCubit/layoutStates.dart';
 import 'package:social_app/shared/components/components.dart';
-import 'package:social_app/shared/components/constants.dart';
 import 'package:social_app/shared/network/local/cacheHelper.dart';
 import 'package:social_app/shared/styles/colors.dart';
+
+// Explanation for screen => This screen that show after sign up to choose your photo before you start on homeScreen
 
 class CreateUserImageScreen extends StatelessWidget {
   const CreateUserImageScreen({Key? key}) : super(key: key);
@@ -33,7 +34,7 @@ class CreateUserImageScreen extends StatelessWidget {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text("Welcome ${cubit.userData?.name.toString()}",style: const TextStyle(fontWeight: FontWeight.bold,fontSize: 20),),
+                            Text("Welcome ${cubit.userData?.userName.toString()}",style: const TextStyle(fontWeight: FontWeight.bold,fontSize: 20),),
                             const SizedBox(height: 40,),
                             Stack(
                               alignment: AlignmentDirectional.center,
@@ -92,9 +93,11 @@ class CreateUserImageScreen extends StatelessWidget {
                 ),
                 Container(
                   alignment: AlignmentDirectional.topEnd,
+                  width: 60,
+                  height: 40,
                   child: defaultTextButton(title: const Text("Next",style: TextStyle(color: mainColor,fontWeight: FontWeight.bold,fontSize: 18),), onTap: (){
                     CacheHelper.saveCacheData(key: 'passedChosenImage', val: true).then((value){
-                      cubit.updateUserDataWithImage(name: cubit.userData!.name!,userName: cubit.userData!.userName!,bio: cubit.userData!.bio!,email: cubit.userData!.email!);
+                      cubit.updateUserDataWithImage(userName: cubit.userData!.userName!,bio: cubit.userData!.bio!,email: cubit.userData!.email!);
                       Navigator.pushReplacementNamed(context,'homeLayoutScreen');});
                   }),
                 )

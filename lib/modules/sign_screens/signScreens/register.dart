@@ -12,7 +12,6 @@ import 'login.dart';
 class RegisterScreen extends StatelessWidget {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
-  final nameController = TextEditingController();
   final userNameController = TextEditingController();
   final formKey = GlobalKey<FormState>();
 
@@ -64,17 +63,6 @@ class RegisterScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 10,),
                         defaultTextFormField(
-                            inputType: TextInputType.name,
-                            controller: nameController,
-                            prefixIcon: Icons.person,
-                            hint: "Name",
-                            validateMethod: (val)
-                            {
-                              return emailController.text.isEmpty ? "Name must not be empty" : null ;
-                            }
-                        ),
-                        const SizedBox(height: 10,),
-                        defaultTextFormField(
                             inputType: TextInputType.emailAddress,
                             controller: emailController,
                             prefixIcon: Icons.email,
@@ -108,7 +96,7 @@ class RegisterScreen extends StatelessWidget {
                                 minWidth: double.infinity,
                                 onTap: ()
                                 {
-                                  cubit.createUser(userName:userNameController.text,email: emailController.text, password: passwordController.text, name: nameController.text);
+                                  cubit.createUser(userName:userNameController.text,email: emailController.text, password: passwordController.text);
                                 },
                                 padding: const EdgeInsets.all(10),
                                 roundedRectangleBorder: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25.0))

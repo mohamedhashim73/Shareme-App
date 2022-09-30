@@ -2,16 +2,15 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:social_app/modules/createUserImageScreen/create_userImage_Screen.dart';
-import 'package:social_app/layouts/cubit/layoutCubit.dart';
+import 'package:social_app/layouts/layoutCubit/layoutCubit.dart';
 import 'package:social_app/layouts/homeLayoutScreen/home_layout_screen.dart';
 import 'package:social_app/modules/create_post/createPostScreen.dart';
 import 'package:social_app/modules/edit_profile/editProfileScreen.dart';
-import 'package:social_app/modules/profile/profileScreen.dart';
 import 'package:social_app/modules/sign_screens/cubit/signCubit.dart';
 import 'package:social_app/modules/sign_screens/signScreens/login.dart';
 import 'package:social_app/shared/components/constants.dart';
 import 'package:social_app/shared/network/local/cacheHelper.dart';
-import 'package:social_app/shared/styles/colors.dart';
+import 'package:social_app/shared/styles/theme.dart';
 import 'firebase_options.dart';
 import 'layouts/bloc_observer.dart';
 import 'modules/sign_screens/signScreens/register.dart';
@@ -43,24 +42,7 @@ class MyApp extends StatelessWidget {
         child: MaterialApp(
           home: userID != null && passedChosenImage == true ? const HomeLayoutScreen() : userID == null ? LoginScreen() : const CreateUserImageScreen(),
           debugShowCheckedModeBanner: false,
-          theme: ThemeData(
-              primarySwatch: Colors.teal,
-            appBarTheme: const AppBarTheme(
-              backgroundColor: Colors.transparent,
-              foregroundColor: blackColor,
-              elevation: 0,
-            ),
-            bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-              backgroundColor: Colors.white,
-              unselectedItemColor: Colors.grey,
-              selectedItemColor: mainColor,
-              showSelectedLabels: false,
-              showUnselectedLabels: false,
-              type: BottomNavigationBarType.fixed,
-              selectedIconTheme: IconThemeData(size: 28),
-              unselectedIconTheme: IconThemeData(size: 25),
-            ),
-          ),
+          theme: lightThemeData,
           routes:
           {
             'register' : (context)=>RegisterScreen(),
@@ -74,3 +56,9 @@ class MyApp extends StatelessWidget {
     );
   }
 }
+
+ /*
+    * very important comment => if I update userData and then show posts for him will show the last userData for him as it saved with create post on PostDataModel
+    * I mean that the name which was when i create post will show with
+    * so I should find a solution to this problem
+ */
