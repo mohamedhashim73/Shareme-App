@@ -38,8 +38,8 @@ class LayoutCubit extends Cubit<LayoutStates>{
 
   // Method to get UserData when User open LayoutScreen
   UserDataModel? userData;       // first made an object from UserDataModel to use it on the App
-  List<UserDataModel> allUsersData = [];
-  List<String> allUsersID = [];
+  List<UserDataModel> usersData = [];
+  List<String> usersID = [];
   void getUserData(){
     emit(GetUserDataLoadingState());
     FirebaseFirestore.instance.collection("users").doc(userID?? CacheHelper.getCacheData(key: 'uid')).get().then((value){
@@ -53,19 +53,22 @@ class LayoutCubit extends Cubit<LayoutStates>{
   }
 
   // get all users data
-  void getAllUsersData(){
-    allUsersData = [];
-    allUsersID = [];
-    emit(GetAllUsersDataLoadingState());
+  void getUsersData(){
+    usersData = [];
+    usersID = [];
+    emit(GetUsersDataLoadingState());
     FirebaseFirestore.instance.collection('users').get()
     .then((value){
       value.docs.forEach((element) {
         print(element.id);
-        allUsersID.add(element.id);
-        allUsersData.add(UserDataModel.fromJson(element.data()));
-        emit(GetAllUsersDataSuccessState());
+        if( userData!.userID != element.id)
+        {
+          usersID.add(element.id);
+          usersData.add(UserDataModel.fromJson(element.data()));
+        }
+        emit(GetUsersDataSuccessState());
       });
-    }).catchError((onError){emit(GetAllUsersDataErrorState());});
+    }).catchError((onError){emit(GetUsersDataErrorState());});
   }
 
   // *********** This logic related to Profile Image
@@ -137,8 +140,8 @@ class LayoutCubit extends Cubit<LayoutStates>{
     final model = PostDataModel(userData!.userName, userData!.userID, userData!.image,postCaption,timeNow.toString(),postImage?? "");
     FirebaseFirestore.instance.collection('users').doc(userData!.userID).collection('posts')
         .add(model.toJson()).then((value){
-      // here must write getPostsData as if there is an update
-      getPostsForUser();   // as there is update on Posts
+      getUserPosts();   // as there is update on Posts
+      getUsersPosts();   // as there is an update for on person so I getUsersPosts
       emit(UploadPostWithoutImageSuccessState()); // success
     }).catchError((error){print(error.toString());emit(UploadPostWithoutImageErrorState());});
   }
@@ -170,33 +173,32 @@ class LayoutCubit extends Cubit<LayoutStates>{
 
   // get posts for specific user to show on profile screen
   List<PostDataModel> userPostsData = [];    // as i send data as PostDataModel to FireStore
-  void getPostsForUser(){
+  void getUserPosts(){
     userPostsData = [];
-    emit(GetPostsDataForSpecificUserLoadingState());
-    FirebaseFirestore.instance.collection('users').doc(CacheHelper.getCacheData(key: 'uid')??userData!.userID).collection('posts').get()
-    .then((value){
+    emit(GetUserPostsLoadingState());
+    FirebaseFirestore.instance.collection('users').doc(CacheHelper.getCacheData(key: 'uid')??userData!.userID).collection('posts').snapshots()
+    .listen((value){
       value.docs.forEach((element) {
         userPostsData.add(PostDataModel.fromJson(json: element.data()));
-        emit(GetUserDataSuccessState());
+        emit(GetUserPostsSuccessState());
       });
-    }).catchError((error)=>emit(GetPostsDataForSpecificUserErrorState()));
+    });
   }
 
   // get posts for all users to display on homeScreen
   List<PostDataModel> usersPostsData = [];    // as i send data as PostDataModel to FireStore
-  void getPostsForAllUsers(){
+  void getUsersPosts(){
     usersPostsData = [];
-    emit(GetPostsDataForAllUsersLoadingState());
+    emit(GetUsersPostsLoadingState());
     FirebaseFirestore.instance.collection('users').get().then((value){
       value.docs.forEach((element) {
-        element.reference.collection('posts').get().then((val){
-          // get posts for every user
-          val.docs.forEach((postData) {
-            usersPostsData.add(PostDataModel.fromJson(json: postData.data()));
+        element.reference.collection('posts').snapshots().listen((event){
+          event.docs.forEach((val) {
+            usersPostsData.add(PostDataModel.fromJson(json: val.data()));
           });
         });
-        emit(GetPostsDataForAllUsersSuccessState(usersPostsData.length));
+        emit(GetUsersPostsSuccessState(usersPostsData.length));
       });
-    }).catchError((error){print(error.toString());emit(GetPostsDataForAllUsersErrorState());});
+    }).catchError((error){print(error.toString());emit(GetUsersPostsErrorState());});
   }
 }

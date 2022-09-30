@@ -37,7 +37,7 @@ class MyApp extends StatelessWidget {
         providers:
         [
           BlocProvider(create: (BuildContext context)=>SignCubit()),
-          BlocProvider(create: (BuildContext context)=>LayoutCubit()..getUserData()..getAllUsersData()..getPostsForUser()..getPostsForAllUsers()),
+          BlocProvider(create: (BuildContext context)=>LayoutCubit()..getUserData()..getUsersPosts()..getUsersData()..getUserPosts()),
         ],
         child: MaterialApp(
           home: userID != null && passedChosenImage == true ? const HomeLayoutScreen() : userID == null ? LoginScreen() : const CreateUserImageScreen(),

@@ -68,7 +68,7 @@ class ProfileScreen extends StatelessWidget {
                                 decoration: BoxDecoration(shape: BoxShape.circle,border: Border.all(color: blackColor.withOpacity(0.5))),
                                 child: Image(image: NetworkImage(cubit.userData!.image!),fit: BoxFit.contain,),),
                             ),
-                            Expanded(child: defaultUserInfo(title: 'Posts', number: '0', onTap: () {  }),),
+                            Expanded(child: defaultUserInfo(title: 'Posts', number: '${cubit.userPostsData.length}', onTap: () {  }),),
                             Expanded(child: defaultUserInfo(title: 'Followers', number: '0', onTap: () {  })),
                             Expanded(child: defaultUserInfo(title: 'Following', number: '0', onTap: () {  }),)
                           ],
@@ -200,9 +200,10 @@ class ProfileScreen extends StatelessWidget {
     Container(
       height: double.infinity,
       width: double.infinity,
+      alignment: Alignment.center,
       color: Colors.grey.withOpacity(0.2),
       padding: const EdgeInsets.all(5),
-      child: Text(model.postCaption!,style: Theme.of(context).textTheme.caption!.copyWith(color: blackColor)),
+      child: Text(model.postCaption!,style: Theme.of(context).textTheme.caption!.copyWith(color: blackColor,fontSize: 13.5),textAlign: TextAlign.center,),
     )
     ;
   }

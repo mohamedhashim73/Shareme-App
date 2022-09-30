@@ -93,9 +93,8 @@ class CreateUserImageScreen extends StatelessWidget {
                 ),
                 Container(
                   alignment: AlignmentDirectional.topEnd,
-                  width: 60,
-                  height: 40,
-                  child: defaultTextButton(title: const Text("Next",style: TextStyle(color: mainColor,fontWeight: FontWeight.bold,fontSize: 18),), onTap: (){
+                  width: double.infinity,
+                  child: defaultTextButton(width: 40,title: const Text("Next",style: TextStyle(color: mainColor,fontWeight: FontWeight.bold,fontSize: 18),), onTap: (){
                     CacheHelper.saveCacheData(key: 'passedChosenImage', val: true).then((value){
                       cubit.updateUserDataWithImage(userName: cubit.userData!.userName!,bio: cubit.userData!.bio!,email: cubit.userData!.email!);
                       Navigator.pushReplacementNamed(context,'homeLayoutScreen');});

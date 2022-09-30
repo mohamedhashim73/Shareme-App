@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:social_app/models/user_data_model.dart';
@@ -8,23 +9,28 @@ class ChatScreen extends StatelessWidget {
   const ChatScreen({Key? key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<LayoutCubit,LayoutStates>(
-        listener: (context,state){},
-        builder: (context,state){
-          final cubit = LayoutCubit.getCubit(context);
-          return Scaffold(
-            appBar: AppBar(title: Text("Chat"),),
-            body: cubit.allUsersData.isEmpty ?
-                const Center(child: CircularProgressIndicator(),) :
+    return Builder(
+      builder: (BuildContext context){
+        LayoutCubit.getCubit(context).getUsersData();
+        return BlocConsumer<LayoutCubit,LayoutStates>(
+            listener: (context,state){},
+            builder: (context,state){
+              final cubit = LayoutCubit.getCubit(context);
+              return Scaffold(
+                appBar: AppBar(leading: const Text(''),leadingWidth:0,title: Text("Chat"),),
+                body: cubit.usersData.isEmpty ?
+                const Center(child: CupertinoActivityIndicator()) :
                 ListView.separated(
                     itemBuilder: (context,index){
-                      return buildChatItem(context: context,model: cubit.allUsersData[index]);
+                      return buildChatItem(context: context,model: cubit.usersData[index]);
                     },
                     separatorBuilder: (context,i)=>Container(height: 5),
-                    itemCount: cubit.allUsersID.length
+                    itemCount: cubit.usersID.length
                 ),
-          );
-        }
+              );
+            }
+        );
+      },
     );
   }
 

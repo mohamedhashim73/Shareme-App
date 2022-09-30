@@ -13,8 +13,7 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Builder(
       builder: (BuildContext context){
-        // call getPostsForAllUsers for first time i open this screen
-        LayoutCubit.getCubit(context).getPostsForAllUsers();
+        print(LayoutCubit.getCubit(context).usersPostsData.length.toString());
         return BlocConsumer<LayoutCubit,LayoutStates>(
             listener: (context,state){},
             builder: (context,state){
@@ -22,7 +21,7 @@ class HomeScreen extends StatelessWidget {
               return Scaffold(
                 backgroundColor: whiteColor,
                 appBar: AppBar(leading: const Text(""),leadingWidth: 0,title: const Text("Feed"),toolbarHeight: 45,),
-                body: state is GetPostsDataForAllUsersLoadingState ?  // mean that there is no posts for all users on FireStore
+                body: cubit.usersPostsData.isEmpty && cubit.userData != null ?  // mean that there is no posts for all users on FireStore
                 const Center(child: CupertinoActivityIndicator(color: mainColor,),) :
                 SizedBox(
                   height: double.infinity,

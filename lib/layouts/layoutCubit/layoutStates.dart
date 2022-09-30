@@ -10,11 +10,11 @@ class GetUserDataSuccessState extends LayoutStates{}
 
 class GetUserDataErrorState extends LayoutStates{}
 
-class GetAllUsersDataLoadingState extends LayoutStates{}
+class GetUsersDataLoadingState extends LayoutStates{}
 
-class GetAllUsersDataSuccessState extends LayoutStates{}
+class GetUsersDataSuccessState extends LayoutStates{}
 
-class GetAllUsersDataErrorState extends LayoutStates{}
+class GetUsersDataErrorState extends LayoutStates{}
 
 class GetProfileImageLoadingState extends LayoutStates{}
 
@@ -60,19 +60,17 @@ class UploadImageForPostErrorState extends LayoutStates{}
 class CanceledImageForPostState extends LayoutStates{}
 
 // for specific user
-class GetPostsDataForSpecificUserLoadingState extends LayoutStates{}
+class GetUserPostsLoadingState extends LayoutStates{}
 
-class GetPostsDataForSpecificUserSuccessState extends LayoutStates{}
-
-class GetPostsDataForSpecificUserErrorState extends LayoutStates{}
+class GetUserPostsSuccessState extends LayoutStates{}
 
  // for all users
-class GetPostsDataForAllUsersLoadingState extends LayoutStates{}
+class GetUsersPostsLoadingState extends LayoutStates{}
 
-class GetPostsDataForAllUsersSuccessState extends LayoutStates{
+class GetUsersPostsSuccessState extends LayoutStates{
   final int usersPostsLength;
-  GetPostsDataForAllUsersSuccessState(this.usersPostsLength);
+  GetUsersPostsSuccessState(this.usersPostsLength);
 }
 
-class GetPostsDataForAllUsersErrorState extends LayoutStates{}
+class GetUsersPostsErrorState extends LayoutStates{}
 
