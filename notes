@@ -1,0 +1,6 @@
+* last update => made a post with add a comment and show them on seperated screen but not finish shown the number of comments in post.
+* made the profile screen with display posts like instagram and if i click on the photo will open the post in seperated screen.
+* need to fix the issue of responsive on chat details screen and create post screen also as there is a issue when i start type the caption after select image.
+* didn't finish the search on the app yet
+* didn't complete the archived story yet that exist on profile screen.
+* try to solve the issue of add a post but not show it immediately on homeLayoutScreen as it shown but after a white.
