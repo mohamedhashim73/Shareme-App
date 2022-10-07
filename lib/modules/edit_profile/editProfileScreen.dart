@@ -20,7 +20,7 @@ class EditProfileScreen extends StatelessWidget {
         listener: (context,state) {
           if( state is UpdateUserDataWithoutImageSuccessState )
           {
-            showSnackBar(message: "User Data Updated successfully!", context: context, color: Colors.grey);
+            showDefaultSnackBar(message: "User Data Updated successfully!", context: context, color: Colors.grey);
             Navigator.pushReplacementNamed(context, 'homeLayoutScreen');
           }
         },

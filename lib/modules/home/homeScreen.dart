@@ -1,19 +1,24 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:social_app/layouts/commentsViewScreen/commentsViewScreen.dart';
 import 'package:social_app/layouts/layoutCubit/layoutCubit.dart';
 import 'package:social_app/layouts/layoutCubit/layoutStates.dart';
+import 'package:social_app/layouts/likesViewScreen/likesViewScreen.dart';
 import 'package:social_app/models/post_Data_Model.dart';
-import 'package:social_app/shared/components/constants.dart';
+import 'package:social_app/modules/edit_post/edit_post_screen.dart';
+import 'package:social_app/modules/profile/profileScreen.dart';
 import 'package:social_app/shared/styles/colors.dart';
+import '../../shared/components/components.dart';
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+  const HomeScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Builder(
-      builder: (BuildContext context){
-        print(LayoutCubit.getCubit(context).usersPostsData.length.toString());
+      builder: (context) {
+        LayoutCubit.getCubit(context)..getUsersPosts()..getMyData();
         return BlocConsumer<LayoutCubit,LayoutStates>(
             listener: (context,state){},
             builder: (context,state){
@@ -21,40 +26,75 @@ class HomeScreen extends StatelessWidget {
               return Scaffold(
                 backgroundColor: whiteColor,
                 appBar: AppBar(leading: const Text(""),leadingWidth: 0,title: const Text("Feed"),toolbarHeight: 45,),
-                body: cubit.usersPostsData.isEmpty && cubit.userData != null ?  // mean that there is no posts for all users on FireStore
-                const Center(child: CupertinoActivityIndicator(color: mainColor,),) :
-                SizedBox(
-                  height: double.infinity,
-                  width: double.infinity,
-                  child: SingleChildScrollView(
-                    physics: const BouncingScrollPhysics(),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children:
-                      [
-                        ListView.separated(
-                          physics: const NeverScrollableScrollPhysics(),
-                          shrinkWrap: true,
-                          itemBuilder: (context,i){
-                            return buildPostItem(context: context, cubit: cubit,model: cubit.usersPostsData[i]);
-                          },
-                          separatorBuilder: (context,i){
-                            return const Divider(thickness: 1,height: 3,);
-                          },
-                          itemCount: cubit.usersPostsData.length,
-                        ),
-                      ],
+                body: cubit.userData != null ?  // mean that there is no posts for all users on FireStore
+                  SizedBox(
+                    height: double.infinity,
+                    width: double.infinity,
+                    child: SingleChildScrollView(
+                      physics: const BouncingScrollPhysics(),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children:
+                        [
+                          GestureDetector(
+                            onTap: ()
+                            {
+                              Navigator.pushNamed(context, 'createPostScreen');
+                            },
+                            child: Container(
+                              margin: const EdgeInsets.symmetric(horizontal: 10,vertical: 5),
+                              child: Row(
+                                children:
+                                [
+                                  CircleAvatar(
+                                    radius: 27,
+                                    backgroundImage: cubit.userData != null ? NetworkImage(cubit.userData!.image!) : null,
+                                  ),
+                                  const SizedBox(width: 10,),
+                                  Expanded(
+                                      child: Container(
+                                        width: double.infinity,
+                                        padding: const EdgeInsets.symmetric(vertical: 10,horizontal: 15),
+                                        decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.circular(20),border: Border.all(color: Colors.grey.withOpacity(0.5))
+                                        ),
+                                        child: Text("What's on your mind ?",style: TextStyle(color: blackColor.withOpacity(0.7)),),
+                                      )
+                                  ),
+                                  const SizedBox(width: 7.5,),
+                                  const Icon(Icons.image,color: mainColor,size: 30,)
+                                ],
+                              ),
+                            ),
+                          ),
+                          ListView.separated(
+                            physics: const NeverScrollableScrollPhysics(),
+                            shrinkWrap: true,
+                            itemBuilder: (context,index){
+                              return buildPostItem(
+                                  context: context,
+                                  cubit: cubit,
+                                  model: cubit.usersPostsData[index],
+                                  index: index
+                              );
+                            },
+                            separatorBuilder: (context,i){
+                              return const Divider(thickness: 1,height: 3,);
+                            },
+                            itemCount: cubit.usersPostsData.length,
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                ),
+                  ) :
+                  const Center(child: CupertinoActivityIndicator(color: mainColor,),),
               );
             }
         );
-      },
+      }
     );
   }
-
-  Widget buildPostItem({required BuildContext context,required PostDataModel model,required LayoutCubit cubit}){
+  Widget buildPostItem({required BuildContext context,required PostDataModel model,required LayoutCubit cubit,required int index}){
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.start,
@@ -73,7 +113,8 @@ class HomeScreen extends StatelessWidget {
                   ),
                   CircleAvatar(
                     radius: 20,
-                    backgroundImage: NetworkImage(model.userImage!),
+                    // did yhe condition down as if I update my date will show with update as I sent data with post with the last data for me like my image for example
+                    backgroundImage: NetworkImage(cubit.userData!.userID == cubit.usersPostsData[index].userID ? cubit.userData!.image!: model.userImage!),
                   ),
                 ],
               ),
@@ -82,81 +123,184 @@ class HomeScreen extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // const SizedBox(height: 2.5,),
-                  Text(model.userName!,style: const TextStyle(fontSize: 16),),   // if user change userName , it will be shown but if shown the value that store on postData there will be difference
+                  // did yhe condition down as if I update my date will show with update as I sent data with post with the last data for me like my image for example
+                  Text(cubit.userData!.userID == cubit.usersPostsData[index].userID ? cubit.userData!.userName!: model.userName!,style: const TextStyle(fontSize: 16),),
                   const SizedBox(height: 2,),
                   Text(model.postDate!,style: Theme.of(context).textTheme.caption,),
                 ],
               ),
               const Spacer(),
-              GestureDetector(child: Icon(Icons.more_vert,color: blackColor.withOpacity(0.5),size: 25,),onTap: (){},),
+              GestureDetector(
+                child: Icon(Icons.more_vert,color: blackColor.withOpacity(0.5),size: 25,),
+                onTap: ()
+                {
+                  // meaning that if the postMakerID not equal my ID so I don't have a permission to do this
+                  if ( cubit.usersPostsData[index].userID == cubit.userData!.userID)
+                  {
+                    showMenu(
+                        context: context,
+                        elevation: 1,
+                        position: const RelativeRect.fromLTRB(25.0, 25.0, 0.0, 0.0),
+                        items:
+                        [
+                          PopupMenuItem(
+                            onTap: () {},
+                            child: GestureDetector(
+                              child: const Text('update post'),
+                              onTap: ()
+                              {
+                                Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>EditPostScreen(model: model,postID: cubit.postsID[index],)));
+                              },
+                            )
+                          ),
+                          PopupMenuItem(
+                            onTap: ()
+                            {
+                              cubit.deletePost(postMakerID: cubit.usersPostsData[index].userID!, postID: cubit.postsID[index]);
+                            },
+                            child: const Text('delete post'),
+                          ),
+                        ]
+                    );
+                  }
+                },
+              ),
             ],
           ),
         ),
         if( model.postCaption != '' )
-        const SizedBox(height: 10,),
+          const SizedBox(height: 10,),
         if( model.postCaption != '' )
-        Container(
-          color: model.postImage == '' ? Colors.white.withOpacity(0.2) : whiteColor,
-          padding : const EdgeInsets.symmetric(horizontal: 12.0,vertical: 5),
-          child: Text(model.postCaption!,style: model.postImage == '' ? const TextStyle(fontWeight: FontWeight.w400,fontSize: 17.5) : const TextStyle()),
-        ),
+          Container(
+            color: model.postImage == '' ? Colors.white.withOpacity(0.2) : whiteColor,
+            padding : const EdgeInsets.symmetric(horizontal: 12.0,vertical: 5),
+            child: Text(model.postCaption!,style: model.postImage == '' ? const TextStyle(fontWeight: FontWeight.w400,fontSize: 18.5) : const TextStyle(fontSize: 17)),
+          ),
         if( model.postImage != '' )   // as if image not exist postImage on fireStore will have '' value
-        const SizedBox(height: 10,),
+          const SizedBox(height: 10,),
         if( model.postImage != '' )
-        Container(
-          decoration: BoxDecoration(
-            border: Border(top: BorderSide(color: Colors.grey.withOpacity(0.1),width: 1),bottom: BorderSide(color: Colors.grey.withOpacity(0.3),width: 1))
+          Container(
+            decoration: BoxDecoration(
+                border: Border(top: BorderSide(color: Colors.grey.withOpacity(0.1),width: 1),bottom: BorderSide(color: Colors.grey.withOpacity(0.3),width: 1))
+            ),
+            child: Image.network(model.postImage!),
           ),
-          child: Image.network(model.postImage!),
-        ),
-        const SizedBox(height: 8,),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 7.0),
-          child: Row(
-            children: [
-              GestureDetector(onTap:(){},child: const Icon(Icons.favorite_border,color: Colors.grey,size: 22,)),
-              const SizedBox(width: 12.5),
-              GestureDetector(onTap:(){},child: const Icon(Icons.messenger_outline,color: Colors.grey,size: 22,)),
-              const SizedBox(width: 12.5),
-              GestureDetector(onTap:(){},child: const Icon(Icons.send,color: Colors.grey,size: 22,)),
-              const Spacer(),
-              GestureDetector(onTap:(){},child: const Icon(Icons.turned_in_not,color: Colors.grey,size: 22,)),
-            ],
-          ),
-        ),
+        const SizedBox(height: 12.5,),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children:
-            [
-              const SizedBox(height: 5),
-              Text("0 likes",style: Theme.of(context).textTheme.caption,),
-              Row(
-                children:
-                [
-                  CircleAvatar(
-                    radius: 15,
-                    backgroundImage: NetworkImage(cubit.userData?.image.toString() ?? defaultUserImage),
-                  ),
-                  const SizedBox(width: 10,),
-                  Expanded(
-                    child: TextFormField(
-                      decoration: InputDecoration(
-                        border: InputBorder.none,
-                        contentPadding: const EdgeInsets.all(0),
-                        hintText: "add a new comment...",
-                        hintStyle: Theme.of(context).textTheme.caption!.copyWith(fontSize: 14)
-                      ),
-                    ),
-                  )
-                ],
+          child: Row(
+            children: [
+              Expanded(
+                child: InkWell(
+                    onTap: ()
+                    {
+                      Navigator.push(context, MaterialPageRoute(builder: (context){return LikesViewScreen(postID: cubit.postsID[index], postMakerID: model.userID!);}));
+                    },
+                    child: Text("0 likes",style: Theme.of(context).textTheme.caption,)),
+                    // Text("${cubit.likesNumber[index]} likes",style: Theme.of(context).textTheme.caption,)),
+              ),
+              Expanded(
+                child: InkWell(
+                  onTap: ()
+                  {
+                    Navigator.push(context, MaterialPageRoute(builder: (context){return CommentsScreen(postID: cubit.postsID[index], postMakerID: model.userID!,);}));
+                  },
+                    child: Align(
+                        alignment:AlignmentDirectional.topEnd,
+                        child: Text("${cubit.commentsNumber.isEmpty? "0" : cubit.commentsNumber[index]} comments", style: Theme.of(context).textTheme.caption,))),
               )
             ],
-          )
-        )
+          ),
+        ),
+        buildDividerItem(),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20.0),
+          child: Row(
+            children: [
+              Expanded(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    GestureDetector(
+                        onTap:()
+                          {
+                          },
+                        child: const Icon(Icons.favorite,color: Colors.grey,size: 22),
+                    ),
+                    const SizedBox(width: 7,),
+                    Text("likes",style: Theme.of(context).textTheme.caption),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    GestureDetector(onTap:(){},child: const Icon(Icons.messenger_outline,color: Colors.grey,size: 22,)),
+                    const SizedBox(width: 7,),
+                    Text("comments",style: Theme.of(context).textTheme.caption),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    GestureDetector(onTap:(){},child: const Icon(Icons.send,color: Colors.grey,size: 22,)),
+                    const SizedBox(width: 7,),
+                    Text("share",style: Theme.of(context).textTheme.caption,),
+                  ],
+                ),
+              )
+            ],
+          ),
+        ),
+        buildDividerItem(),
+        const SizedBox(height: 7.5),
+        Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children:
+              [
+                Row(
+                  children:
+                  [
+                    InkWell(
+                      onTap: ()
+                      {
+                        Navigator.push(context, MaterialPageRoute(builder: (context)=>ProfileScreen()));
+                      },
+                      child: CircleAvatar(
+                        radius: 15,
+                        backgroundImage: NetworkImage(cubit.userData!.image!),
+                      ),
+                    ),
+                    const SizedBox(width: 10,),
+                    Expanded(
+                        child: InkWell(
+                          onTap: ()
+                          {
+                            Navigator.push(context, MaterialPageRoute(builder: (context){return CommentsScreen(postID: cubit.postsID[index], postMakerID: model.userID!);}));
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(25),
+                                border: Border.all(color: Colors.grey.withOpacity(0.5))
+                            ),
+                            child: Text("Add a new comment....",style: Theme.of(context).textTheme.caption,),
+                          ),
+                        )
+                    )
+                  ],
+                )
+              ],
+            )
+        ),
+        const SizedBox(height: 12.0,),
       ],
     );
   }
+
 }

@@ -31,7 +31,7 @@ class SignCubit extends Cubit<SignStates>{
   // Method to save UserData on cloud fireStore
   void saveUserData({required String userName,required String email,required String uid}){
     emit(SaveUserDataLoadingState());
-    UserDataModel model = UserDataModel(userName:userName,email: email,userID: uid,image: defaultUserImage,bio: "write your bio ...");
+    UserDataModel model = UserDataModel(userName:userName,email: email,userID: uid,image: '',bio: "write your bio ...");
     FirebaseFirestore.instance.collection('users').doc(uid).set(model.toJson()).then((value){
       emit(SaveUserDataSuccessState());
     }).catchError((e)=>emit(SaveUserDataErrorState(e)));
@@ -41,8 +41,8 @@ class SignCubit extends Cubit<SignStates>{
   void userLogin({required String email,required String password}){
     emit(UserLoginLoadingState());
     FirebaseAuth.instance.signInWithEmailAndPassword(email: email, password: password).then((value){
-      emit(UserLoginSuccessState());
       CacheHelper.saveCacheData(key: 'uid', val: value.user!.uid);
+      emit(UserLoginSuccessState());
     }).catchError((onError)=>emit(UserLoginErrorState(onError.toString())));
   }
 

@@ -4,6 +4,9 @@ import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:social_app/models/commentModel.dart';
+import 'package:social_app/models/likeDataModel.dart';
+import 'package:social_app/models/messgaeDataModel.dart';
 import 'package:social_app/models/post_Data_Model.dart';
 import 'package:social_app/models/user_data_model.dart';
 import 'package:social_app/modules/home/homeScreen.dart';
@@ -12,7 +15,6 @@ import 'package:social_app/modules/search/searchScreen.dart';
 import 'package:social_app/shared/components/constants.dart';
 import 'dart:io';
 import 'package:social_app/shared/network/local/cacheHelper.dart';
-
 import '../../modules/chat/chatScreen.dart';
 import 'layoutStates.dart';
 
@@ -25,56 +27,58 @@ class LayoutCubit extends Cubit<LayoutStates>{
   int bottomNavIndex = 0;
   void changeBottomNavIndex(int index){
     bottomNavIndex = index;
-    emit(ChangeBottomNavIndex());
+    emit(ChangeBottomNavIndexState());
   }
 
-  List<Widget> layoutWidgets = [
-    HomeScreen(),
-    SearchScreen(),
-    Text(""),
-    ChatScreen(),
-    ProfileScreen(),
-  ];
+  List<Widget> layoutWidgets = [ const HomeScreen(), const SearchScreen(), const ChatScreen(), ProfileScreen(),];
 
-  // Method to get UserData when User open LayoutScreen
-  UserDataModel? userData;       // first made an object from UserDataModel to use it on the App
-  List<UserDataModel> usersData = [];
-  List<String> usersID = [];
-  void getUserData(){
-    emit(GetUserDataLoadingState());
-    FirebaseFirestore.instance.collection("users").doc(userID?? CacheHelper.getCacheData(key: 'uid')).get().then((value){
+  /*
+    1) get My Data to show in Profile screen and use it in other screens
+  */
+  UserDataModel? userData;
+  void getMyData(){
+    FirebaseFirestore.instance.collection("users").doc(userID??CacheHelper.getCacheData(key: 'uid')).get().then((value){
       userData = UserDataModel.fromJson(value.data()!);
       print("User Id after adding to Model is ${userData!.userName}");
       emit(GetUserDataSuccessState());
-    }).catchError((e){
-      print("Error during Getting User data is ${e.toString()}");
-      emit(GetUserDataErrorState());
     });
   }
 
-  // get all users data
+  // ***************************************************************************
+
+  /*
+    2) get Data for all users to show on chat screen
+  */
+
+  List<UserDataModel> usersData = [];
+  List<String> usersID = [];
   void getUsersData(){
-    usersData = [];
-    usersID = [];
-    emit(GetUsersDataLoadingState());
-    FirebaseFirestore.instance.collection('users').get()
-    .then((value){
+    if( usersData.isEmpty )
+    {
+      FirebaseFirestore.instance.collection('users').snapshots().listen((value){
+      usersData = [];
+      usersID = [];
       value.docs.forEach((element) {
         print(element.id);
-        if( userData!.userID != element.id)
+        if( userData?.userID != element.id)
         {
           usersID.add(element.id);
           usersData.add(UserDataModel.fromJson(element.data()));
         }
         emit(GetUsersDataSuccessState());
       });
-    }).catchError((onError){emit(GetUsersDataErrorState());});
+    });
+    }
   }
 
-  // *********** This logic related to Profile Image
   bool profileImageChosen = true ;   // this for show images or videos on Profile Screen as User's Tap
 
-  // *********** This logic related to Upload Profile Image
+  // ***************************************************************************
+
+  /*
+    3) set my data || update it also either by name,email,password or update my image
+  */
+
   File? userImageFile;
   final userImagePicker = ImagePicker();
   Future<void> getProfileImage() async{
@@ -97,22 +101,22 @@ class LayoutCubit extends Cubit<LayoutStates>{
     FirebaseFirestore.instance.collection('users').doc(userData!.userID)
     .update(model.toJson())
     .then((value){
-      getUserData();
+      getMyData();  // هنا مش عارف المشكله بتاعه اما ارفع الداتا اللي كان مكتوب داخل textFormField بيتغير وبيأخد الحاجه القديمه عما يخرج من صفحه update
       emit(UpdateUserDataWithoutImageSuccessState());
     }).catchError((e)=>emit(UpdateUserDataWithoutImageErrorState()));
   }
 
   void updateUserDataWithImage({required String email,required String bio,required String userName}){
     emit(UpdateUserDataWithImageLoadingState());
-    firebase_storage.FirebaseStorage.instance.ref().child("users/${Uri.file(userImageFile!.path).pathSegments.last}")
-    .putFile(userImageFile!)
-    .then((val){
-      val.ref.getDownloadURL().then((imageUrl){
-        // upload Update for userData to FireStore
-        updateUserDataWithoutImage(email: email, bio: bio, userName: userName,image: imageUrl);
-      }).catchError((onError)=>emit(UploadUserImageErrorState()));
-    })
-    .catchError((error){emit(UpdateUserDataWithImageErrorState());});
+    firebase_storage.FirebaseStorage.instance.ref()
+        .child("users/${Uri.file(userImageFile!.path).pathSegments.last}")
+        .putFile(userImageFile!)
+        .then((val){
+          val.ref.getDownloadURL().then((imageUrl){
+            // upload Update for userData to FireStore
+            updateUserDataWithoutImage(email: email, bio: bio, userName: userName,image: imageUrl);
+          }).catchError((onError)=>emit(UploadUserImageErrorState()));
+        }).catchError((error){emit(UpdateUserDataWithImageErrorState());});
   }
 
   // made this function as if i change profile photo but canceled update imageProfileUrl will show on EditProfileScreen as i canceled update and i use profileImageUrl to be shown not userData!.image
@@ -120,7 +124,10 @@ class LayoutCubit extends Cubit<LayoutStates>{
     emit(CanceledUpdateUserDataState());
   }
 
-// methods for create new posts
+  /*
+    4) create posts with image or without || delete post from fireStore
+  */
+
   File? postImageFile;
   final postImagePicker = ImagePicker();
   void getPostImage() async{
@@ -130,7 +137,8 @@ class LayoutCubit extends Cubit<LayoutStates>{
         postImageFile = File(pickedPostImage.path);
         emit(ChosenPostImageSuccessfullyState());
       }
-    else{
+    else
+    {
       emit(ChosenPostImageErrorState());
     }
   }
@@ -140,8 +148,6 @@ class LayoutCubit extends Cubit<LayoutStates>{
     final model = PostDataModel(userData!.userName, userData!.userID, userData!.image,postCaption,timeNow.toString(),postImage?? "");
     FirebaseFirestore.instance.collection('users').doc(userData!.userID).collection('posts')
         .add(model.toJson()).then((value){
-      getUserPosts();   // as there is update on Posts
-      getUsersPosts();   // as there is an update for on person so I getUsersPosts
       emit(UploadPostWithoutImageSuccessState()); // success
     }).catchError((error){print(error.toString());emit(UploadPostWithoutImageErrorState());});
   }
@@ -166,39 +172,200 @@ class LayoutCubit extends Cubit<LayoutStates>{
     });
   }
 
+  void updatePost({required String postMakerID,required String postID,required String postMakerName,required String postMakerImage,required String postCaption,required String postDate,required String postImage}){
+    emit(UpdatePostLoadingState());
+    final model = PostDataModel(postMakerName, postMakerID, postMakerImage, postCaption, postDate, postImage);
+    FirebaseFirestore.instance.collection('users').doc(postMakerID).collection('posts').doc(postID).update(model.toJson()).then((value)
+    {
+      getUsersPosts();   // it is possible to not call it if i use real time when i get posts for users as in this case will listen for changes
+      emit(UpdatePostSuccessfullyState());
+    }).catchError((e)=>emit(UpdatePostErrorState()));
+  }
+
+  void deletePost({required String postMakerID,required String postID}){
+    FirebaseFirestore.instance.collection('users').doc(postMakerID).collection('posts').doc(postID).delete().then((value){
+      getUsersPosts();
+      // يفترض يحصل تحديث ف البوستات لان مستعمل real time
+      emit(DeletePostSuccessfullyState());
+    }).catchError((e)=>emit(DeletePostErrorState()));
+  }
+
   void canceledImageForPost(){
     postImageFile = null;
     emit(CanceledImageForPostState());
   }
 
-  // get posts for specific user to show on profile screen
+  // ***************************************************************************
+
+  /*
+    5) get my posts to show on my Profile Screen
+  */
+
   List<PostDataModel> userPostsData = [];    // as i send data as PostDataModel to FireStore
-  void getUserPosts(){
-    userPostsData = [];
+  List<String> myPostsID = [];
+  void getMyPosts(){
     emit(GetUserPostsLoadingState());
     FirebaseFirestore.instance.collection('users').doc(CacheHelper.getCacheData(key: 'uid')??userData!.userID).collection('posts').snapshots()
-    .listen((value){
-      value.docs.forEach((element) {
+        .listen((value){
+      userPostsData = [];
+      myPostsID = [];
+      value.docs.forEach((element){
+        print("Your ID for your posts are ${element.id}");
+        myPostsID.add(element.id);
         userPostsData.add(PostDataModel.fromJson(json: element.data()));
         emit(GetUserPostsSuccessState());
       });
     });
   }
 
-  // get posts for all users to display on homeScreen
-  List<PostDataModel> usersPostsData = [];    // as i send data as PostDataModel to FireStore
+  // ***************************************************************************
+
+  /*
+    6) get all posts for all users to show on Home Screen
+  */
+  List<PostDataModel> usersPostsData = [];
+  List<String> postsID = [];
+  List<int> commentsNumber = [];  // use this var only to show the number of posts but if i want to display all comments i will use getComments() method for specific post using its ID and postMakerID
   void getUsersPosts(){
-    usersPostsData = [];
-    emit(GetUsersPostsLoadingState());
-    FirebaseFirestore.instance.collection('users').get().then((value){
-      value.docs.forEach((element) {
-        element.reference.collection('posts').snapshots().listen((event){
-          event.docs.forEach((val) {
-            usersPostsData.add(PostDataModel.fromJson(json: val.data()));
+    print("Start get posts for all users before listen to data");
+    FirebaseFirestore.instance.collection('users').snapshots().listen((value){
+      print("Start listen to get posts for all users **************************");
+      commentsNumber = [];
+      usersPostsData = [];
+      postsID = [];
+      value.docs.forEach((element){
+        element.reference.collection('posts').get().then((val){
+          val.docs.forEach((postData){  // postData => post ذات نفسه
+            postData.reference.collection('comments').get().then((val){
+              commentsNumber.add(val.docs.length);
+              postsID.add(postData.id);   // store posts ID to use it when i add a comment
+              usersPostsData.add(PostDataModel.fromJson(json: postData.data()));
+              print("get posts for first time #######################");
+            });
           });
         });
-        emit(GetUsersPostsSuccessState(usersPostsData.length));
       });
-    }).catchError((error){print(error.toString());emit(GetUsersPostsErrorState());});
+      emit(GetUsersPostsSuccessState(usersPostsData.length));
+    });
+  }
+
+  // ***************************************************************************
+
+  /*
+    7) add a like to a post || remove it
+  */
+
+  void addLike({required String postID,required bool isLike}){
+    final model = LikeDataModel(userData!.image,userData!.userID,userData!.userName,DateTime.now().toString(),isLike);
+    FirebaseFirestore.instance.collection('users').get().then((value){
+      value.docs.forEach((element) {
+        element.reference.collection('posts').doc(postID).collection('likes').doc(userData!.userID).set(model.toJson()).then((value){
+          emit(AddLikeSuccessfullyState());   // add like successfully
+        });
+      });
+    }).catchError((error)=>emit(AddLikeErrorState())); // error during add a comment to specific post
+  }
+
+  void removeLike({required String postID}){
+    FirebaseFirestore.instance.collection('users').get().then((value){
+      value.docs.forEach((element) {
+        element.reference.collection('posts').doc(postID).collection('likes').doc(userData!.userID).delete().then((val){
+          emit(RemoveLikeSuccessfullyState());   // add like successfully
+        });
+      });
+    }).catchError((error)=>emit(RemoveLikeErrorState())); // error during add a comment to specific post
+  }
+
+  // get likes for specific post throw its id and show it in separated screen
+  List<LikeDataModel> likesData = [];
+  void getLikes({required String postMakerID,required String postID}){
+    emit(GetLikesLoadingState());
+    FirebaseFirestore.instance.collection('users').doc(postMakerID).collection('posts').doc(postID).collection('likes').snapshots().listen((value){
+      likesData = [];
+      value.docs.forEach((element){
+        print("isLike status is ${element.data()['isLike']}\n");
+        print("isLike status is ${element.data()['dateTime']}");
+        if( element.data()['isLike'] == true )
+        {
+          likesData.add(LikeDataModel.fromJson(json: element.data()));
+        }
+      });
+      emit(GetLikesSuccessfullyState());
+    });
+  }
+
+  // ***************************************************************************
+
+  /*
+    8) add a comment to a post || remove it || get comments for specific post using its ID
+  */
+
+  void addComment({required String comment,required String postID}){
+    final model = CommentDataModel(comment, userData!.userID, userData!.image, userData!.userName,timeNow, postID);
+    FirebaseFirestore.instance.collection('users').get().then((value){
+      value.docs.forEach((element) {
+        element.reference.collection('posts').doc(postID).collection('comments').doc(userData!.userID).set(model.toJson()).then((value){
+        });
+        emit(AddCommentSuccessState());
+      });
+    });
+  }
+
+  List<CommentDataModel> comments = [];
+  void getComments({required String postMakerID,required String postID}){
+    emit(GetCommentsLoadingState());
+    FirebaseFirestore.instance.collection('users').doc(postMakerID).collection('posts').doc(postID).collection('comments').snapshots().listen((value){
+      comments = [];
+      value.docs.forEach((element){
+        comments.add(CommentDataModel.fromJson(json: element.data()));
+      });
+      emit(GetCommentsSuccessState());
+    });
+  }
+
+  // ***************************************************************************
+
+  /*
+    9) send a message to specific user using his ID || get all messages between me and specific user
+  */
+  void sendMessage({required String message,required String messageReceiverID}){
+    // there is no need for loading state and error also
+    final model = MessageDataModel(message,DateTime.now().toString(),messageReceiverID,userData!.userID);
+    // saved message on my collection
+    FirebaseFirestore.instance.collection('users').doc(userData!.userID).collection('chats').doc(messageReceiverID).collection('messages').add(model.toJson()).then((value){
+      emit(SendMessageSuccessState());
+    });
+    // saved message on receiver collection also
+    FirebaseFirestore.instance.collection('users').doc(messageReceiverID).collection('chats').doc(userData!.userID).collection('messages').add(model.toJson()).then((value){
+      emit(SendMessageSuccessState());
+    });
+  }
+
+  List<MessageDataModel> messages = [];
+  void getMessages({required String messageReceiverID}) {
+    print("start get message ************************ messages are ${messages}");
+    emit(GetMessageLoadingState());
+    FirebaseFirestore.instance.collection('users').doc(userData!.userID).collection('chats').doc(messageReceiverID).collection('messages')
+        .orderBy('messageDateTime')
+        .snapshots()
+        .listen((val)
+         {
+           print("start listen to getting message as a real time ########################## messages are $messages");
+           messages = [];
+           val.docs.forEach((element) {
+             messages.add(MessageDataModel.fromJson(json: element.data()));
+           });
+         });
+    emit(GetMessageSuccessState());
+  }
+
+  // ***************************************************************************
+  /*
+    10) delete a person from App completely (( optional ))
+  */
+  void deleteUser({required String personID}){
+    FirebaseFirestore.instance.collection('users').doc(personID).delete().then((value){
+      emit(DeletePersonSuccessfullyState());
+    }).catchError((error)=>emit(DeletePersonErrorState()));
   }
 }

@@ -1,9 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:social_app/modules/createUserImageScreen/create_userImage_Screen.dart';
+import 'package:social_app/modules/create_userImage_screen/create_userImage_Screen.dart';
 import 'package:social_app/modules/sign_screens/cubit/signCubit.dart';
-import '../../../layouts/homeLayoutScreen/home_layout_screen.dart';
 import '../../../shared/components/components.dart';
 import '../../../shared/styles/colors.dart';
 import '../cubit/signStates.dart';
@@ -24,11 +23,11 @@ class RegisterScreen extends StatelessWidget {
         {
           if(state is CreateUserErrorState)
           {
-            showSnackBar(message: state.error.toString(), context: context, color: Colors.grey);
+            showDefaultSnackBar(message: state.error.toString(), context: context, color: Colors.grey);
           }
           if(state is SaveUserDataErrorState)
           {
-            showSnackBar(message: state.error.toString(), context: context, color: Colors.grey);
+            showDefaultSnackBar(message: state.error.toString(), context: context, color: Colors.grey);
           }
           if(state is SaveUserDataSuccessState)
           {

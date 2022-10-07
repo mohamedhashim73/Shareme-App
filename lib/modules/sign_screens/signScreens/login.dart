@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:social_app/layouts/homeLayoutScreen/home_layout_screen.dart';
 import 'package:social_app/modules/sign_screens/cubit/signCubit.dart';
 import 'package:social_app/modules/sign_screens/cubit/signStates.dart';
 import 'package:social_app/modules/sign_screens/signScreens/register.dart';
@@ -18,9 +19,13 @@ class LoginScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocConsumer<SignCubit,SignStates>(
         listener: (context,state){
+          if(state is UserLoginSuccessState)
+          {
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>HomeLayoutScreen()));
+          }
           if(state is UserLoginErrorState)
           {
-            showSnackBar(message: state.error.toString(), context: context, color: Colors.grey);
+            showDefaultSnackBar(message: state.error.toString(), context: context, color: Colors.grey);
           }
         },
         builder: (context,state){
@@ -76,10 +81,6 @@ class LoginScreen extends StatelessWidget {
                             onTap: ()
                             {
                               cubit.userLogin(email: emailController.text, password: passwordController.text);
-                              if(state is UserLoginSuccessState)
-                              {
-                                Navigator.pushReplacementNamed(context,'homeLayoutScreen');
-                              }
                             },
                             padding: const EdgeInsets.all(10),
                             roundedRectangleBorder: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25.0))

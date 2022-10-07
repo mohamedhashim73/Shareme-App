@@ -1,8 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:social_app/modules/profile/profileScreen.dart';
 import 'package:social_app/shared/components/constants.dart';
 import 'package:social_app/shared/styles/colors.dart';
+import '../../layouts/homeLayoutScreen/home_layout_screen.dart';
 import '../../layouts/layoutCubit/layoutCubit.dart';
 import '../../layouts/layoutCubit/layoutStates.dart';
 import '../../shared/components/components.dart';
@@ -17,8 +19,9 @@ class CreatePostScreen extends StatelessWidget {
         {
           if( state is UploadPostWithoutImageSuccessState )
           {
-            showSnackBar(message: "Post Uploaded successfully!", context: context, color: Colors.grey);
-            Navigator.pushReplacementNamed(context, 'homeLayoutScreen');
+            showDefaultSnackBar(message: "Post Uploaded successfully!", context: context, color: Colors.grey);
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>ProfileScreen(leadingIconExist: true,)));
+            // Navigator.pop(context);
             LayoutCubit.getCubit(context).postImageFile = null ;
           }
         },
@@ -28,7 +31,7 @@ class CreatePostScreen extends StatelessWidget {
             backgroundColor: whiteColor,
             appBar: AppBar(
               title: const Text("New Post"),titleSpacing: 0,
-              leading: defaultTextButton(title: const Icon(Icons.arrow_back_ios), onTap: (){Navigator.pushReplacementNamed(context, 'homeLayoutScreen');}),
+              leading: defaultTextButton(title: const Icon(Icons.arrow_back_ios), onTap: (){Navigator.pop(context);}),
               actions:
               [
                 Padding(
@@ -58,10 +61,7 @@ class CreatePostScreen extends StatelessWidget {
             SizedBox(
               height: double.infinity,
               width: double.infinity,
-              child: SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
-                child: buildPostItem(context: context, cubit: cubit),
-              ),
+              child: buildPostItem(context: context, cubit: cubit),
             ),
           );
         }
@@ -71,32 +71,26 @@ class CreatePostScreen extends StatelessWidget {
   Widget buildPostItem({required BuildContext context,dynamic model,required LayoutCubit cubit}){
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.start,
       children: [
         Padding(
           padding: const EdgeInsets.only(left: 10,right: 5,top: 10),
           child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Stack(
-                alignment: AlignmentDirectional.center,
-                children: [
-                  CircleAvatar(
-                    radius: 21.5,
-                    backgroundColor: blackColor.withOpacity(0.5),
+              Container(
+                  clipBehavior: Clip.hardEdge,
+                  height: 50,
+                  width: 50,
+                  decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.grey.withOpacity(0.5))
                   ),
-                  CircleAvatar(
-                    radius: 20,
-                    backgroundImage: NetworkImage(cubit.userData?.image.toString() ?? defaultUserImage),
-                  ),
-                ],
+                  child : cubit.userData?.image != null? Image.network(cubit.userData!.image!,fit: BoxFit.cover,) : const Text("")
               ),
-              const SizedBox(width: 13,),
+              const SizedBox(width: 15,),
               Column(
-                mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // const SizedBox(height: 2.5,),
                   Text(cubit.userData!.userName!,style: const TextStyle(fontSize: 16),),
                   const SizedBox(height: 2,),
                   Text(timeNow,style: Theme.of(context).textTheme.caption,),
@@ -143,39 +137,43 @@ class CreatePostScreen extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 5,),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children:
-          [
-            defaultButton(
-                onTap: (){
-                  cubit.getPostImage();
-                },
-                backgroundColor: whiteColor,
-                contentWidget: Row(
-                  children:
-                  const [
-                    Icon(Icons.image,color: mainColor,),
-                    SizedBox(width: 7,),
-                    Text("Add a photo",style: TextStyle(color: mainColor,fontWeight: FontWeight.bold),)
-                  ],
-                )
-            ),
-            defaultButton(
-                onTap: (){},
-                backgroundColor: whiteColor,
-                contentWidget: Row(
-                  children:
-                  const [
-                    Icon(Icons.closed_caption,color: mainColor,),
-                    SizedBox(width: 7,),
-                    Text("Add a Tag",style: TextStyle(color: mainColor,fontWeight: FontWeight.bold),)
-                  ],
-                )
-            )
-          ],
+        // const SizedBox(height: 5,),
+        Spacer(),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children:
+            [
+              defaultButton(
+                  onTap: (){
+                    cubit.getPostImage();
+                  },
+                  backgroundColor: whiteColor,
+                  contentWidget: Row(
+                    children:
+                    const [
+                      Icon(Icons.image,color: mainColor,),
+                      SizedBox(width: 7,),
+                      Text("add a photo",style: TextStyle(color: mainColor,fontWeight: FontWeight.bold),)
+                    ],
+                  )
+              ),
+              defaultButton(
+                  onTap: (){},
+                  backgroundColor: whiteColor,
+                  contentWidget: Row(
+                    children:
+                    const [
+                      Icon(Icons.link,color: mainColor,),
+                      SizedBox(width: 7,),
+                      Text("add a link",style: TextStyle(color: mainColor,fontWeight: FontWeight.bold),)
+                    ],
+                  )
+              )
+            ],
+          ),
         ),
       ],
     );

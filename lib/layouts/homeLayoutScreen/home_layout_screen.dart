@@ -18,14 +18,24 @@ class HomeLayoutScreen extends StatelessWidget {
             items: [
               const BottomNavigationBarItem(icon: Icon(Icons.home),label: 'null'),
               const BottomNavigationBarItem(icon: Icon(Icons.search),label: 'null'),
-              const BottomNavigationBarItem(icon: CircleAvatar(maxRadius: 18,child: Icon(Icons.add,),),label: 'null'),
               const BottomNavigationBarItem(icon: Icon(Icons.messenger_outline),label: 'null'),
-              BottomNavigationBarItem(icon: CircleAvatar(radius:15.0,backgroundImage: NetworkImage(cubit.userData?.image.toString()?? defaultUserImage)),label: 'null'),
+              BottomNavigationBarItem(
+                  icon: Container(
+                      clipBehavior: Clip.hardEdge,
+                      height: 30,
+                      width: 30,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.grey)
+                      ),
+                      child : cubit.userData?.image != null? Image.network(cubit.userData!.image!,fit: BoxFit.cover,) : const Text("")),
+                  label: 'null'
+              ),
             ],
             currentIndex: cubit.bottomNavIndex,
-            onTap: (index){
+            onTap: (index)
+            {
               cubit.changeBottomNavIndex(index);
-              if( index == 2 ) Navigator.pushNamed(context, 'createPostScreen');
             },
           ),
           body: cubit.layoutWidgets[cubit.bottomNavIndex],

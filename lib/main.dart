@@ -1,11 +1,12 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:social_app/modules/createUserImageScreen/create_userImage_Screen.dart';
+import 'package:social_app/modules/create_userImage_screen/create_userImage_Screen.dart';
 import 'package:social_app/layouts/layoutCubit/layoutCubit.dart';
 import 'package:social_app/layouts/homeLayoutScreen/home_layout_screen.dart';
 import 'package:social_app/modules/create_post/createPostScreen.dart';
 import 'package:social_app/modules/edit_profile/editProfileScreen.dart';
+import 'package:social_app/modules/home/homeScreen.dart';
 import 'package:social_app/modules/sign_screens/cubit/signCubit.dart';
 import 'package:social_app/modules/sign_screens/signScreens/login.dart';
 import 'package:social_app/shared/components/constants.dart';
@@ -37,10 +38,10 @@ class MyApp extends StatelessWidget {
         providers:
         [
           BlocProvider(create: (BuildContext context)=>SignCubit()),
-          BlocProvider(create: (BuildContext context)=>LayoutCubit()..getUserData()..getUsersPosts()..getUsersData()..getUserPosts()),
+          BlocProvider(create: (BuildContext context)=>LayoutCubit()..getMyData..getUsersPosts()),
         ],
         child: MaterialApp(
-          home: userID != null && passedChosenImage == true ? const HomeLayoutScreen() : userID == null ? LoginScreen() : const CreateUserImageScreen(),
+          home: userID != null ? const HomeLayoutScreen() : userID == null ? LoginScreen() : const CreateUserImageScreen(),
           debugShowCheckedModeBanner: false,
           theme: lightThemeData,
           routes:

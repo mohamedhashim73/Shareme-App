@@ -2,7 +2,9 @@ abstract class LayoutStates{}
 
 class InitialLayoutState extends LayoutStates{}
 
-class ChangeBottomNavIndex extends LayoutStates{}
+class ChangeBottomNavIndexState extends LayoutStates{}
+
+// for get my data
 
 class GetUserDataLoadingState extends LayoutStates{}
 
@@ -10,11 +12,11 @@ class GetUserDataSuccessState extends LayoutStates{}
 
 class GetUserDataErrorState extends LayoutStates{}
 
-class GetUsersDataLoadingState extends LayoutStates{}
+// for get users data to show in chat screen and search for a user using it
 
 class GetUsersDataSuccessState extends LayoutStates{}
 
-class GetUsersDataErrorState extends LayoutStates{}
+// for update my data either profileImage , name , email , bio , website link
 
 class GetProfileImageLoadingState extends LayoutStates{}
 
@@ -40,7 +42,8 @@ class ChosenImageSuccessfullyState extends LayoutStates{}
 
 class ChosenImageErrorState extends LayoutStates{}
 
-// for Create new post
+// for Create new post || update post || delete post
+
 class ChosenPostImageSuccessfullyState extends LayoutStates{}
 
 class ChosenPostImageErrorState extends LayoutStates{}
@@ -55,16 +58,28 @@ class UploadPostWithImageLoadingState extends LayoutStates{}
 
 class UploadPostWithImageErrorState extends LayoutStates{}
 
+class UpdatePostLoadingState extends LayoutStates{}
+
+class UpdatePostSuccessfullyState extends LayoutStates{}
+
+class UpdatePostErrorState extends LayoutStates{}
+
+class DeletePostSuccessfullyState extends LayoutStates{}
+
+class DeletePostErrorState extends LayoutStates{}
+
 class UploadImageForPostErrorState extends LayoutStates{}
 
 class CanceledImageForPostState extends LayoutStates{}
 
-// for specific user
+// for get my posts
+
 class GetUserPostsLoadingState extends LayoutStates{}
 
 class GetUserPostsSuccessState extends LayoutStates{}
 
- // for all users
+ // for get All posts for all users
+
 class GetUsersPostsLoadingState extends LayoutStates{}
 
 class GetUsersPostsSuccessState extends LayoutStates{
@@ -74,3 +89,38 @@ class GetUsersPostsSuccessState extends LayoutStates{
 
 class GetUsersPostsErrorState extends LayoutStates{}
 
+// for add a comment and like on post || delete it
+
+class AddLikeSuccessfullyState extends LayoutStates{}
+
+class AddLikeErrorState extends LayoutStates{}
+
+class RemoveLikeSuccessfullyState extends LayoutStates{}
+
+class RemoveLikeErrorState extends LayoutStates{}
+
+class GetLikesLoadingState extends LayoutStates{}
+
+class GetLikesSuccessfullyState extends LayoutStates{}
+
+class AddCommentSuccessState extends LayoutStates{}
+
+class GetCommentsLoadingState extends LayoutStates{}
+
+class GetCommentsSuccessState extends LayoutStates{}
+
+// for send a message to specific user || get messages from specific user
+
+class SendMessageSuccessState extends LayoutStates{}
+
+class SendMessageLoadingState extends LayoutStates{}
+
+class GetMessageSuccessState extends LayoutStates{}
+
+class GetMessageLoadingState extends LayoutStates{}
+
+// delete person from app completely || it's optional for me
+
+class DeletePersonSuccessfullyState extends LayoutStates{}
+
+class DeletePersonErrorState extends LayoutStates{}

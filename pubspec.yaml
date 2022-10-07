@@ -39,13 +39,19 @@ dependencies:
   cupertino_icons: ^1.0.2
   bloc: ^8.1.0
   flutter_bloc: ^8.1.1
-  cached_network_image: ^3.2.2
   shared_preferences: ^2.0.15
   firebase_core: ^1.22.0
   firebase_auth: ^3.9.0
   firebase_storage: ^10.3.9
   cloud_firestore: ^3.4.8
   jiffy: ^5.0.0
+  flutter_launcher_icons: ^0.10.0
+
+flutter_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "images/launcher.png"
+
 
 
 dev_dependencies:
