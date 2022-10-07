@@ -1,7 +1,7 @@
 # Shareme-App
 Full Social App using Dart , Flutter , Firebase , Bloc , SharedPreferences.
 
-some notes about the App
+some notes about the App :
 - made a post successfully and after that show it on profile screen at the same time as i use stream to get my posts.
 - there is an issue as if i create a post and then go to homeLayoutScreen the post will not shown at the same time, it takes about 30 seconds.
 - you can show the post in seperated screen after click on any image for post on profile screen.
