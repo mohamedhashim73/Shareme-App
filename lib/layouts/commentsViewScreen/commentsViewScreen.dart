@@ -39,19 +39,18 @@ class CommentsScreen extends StatelessWidget {
                         children:
                         [
                           state is GetCommentsLoadingState ?
+                              // لو في مشكله في الاسكرينه هتكون بسبب shrinkWrap : true
                               const Center(child: CupertinoActivityIndicator(),) :
-                              cubit.comments.isNotEmpty ?
-                                  ListView.separated(
-                                    physics: const BouncingScrollPhysics(),
-                                    shrinkWrap: true,
-                                    itemBuilder: (context,i){ return buildCommentItem(model: cubit.comments[i]);},
-                                    separatorBuilder: (context,i){return const SizedBox(height: 15.0);},
-                                    itemCount: cubit.comments.length,) :
-                                  const Expanded(
-                                      child: Center(child: Text("No Comments yet",style: TextStyle(fontWeight: FontWeight.w400,fontSize: 17),))
-                                  ),
-                          if( cubit.comments.isNotEmpty )const Spacer(),
-                          // for me to add a new comment or any user
+                              Expanded(
+                                    child: cubit.comments.isNotEmpty ?
+                                      ListView.separated(
+                                        physics: const BouncingScrollPhysics(),
+                                        shrinkWrap: true,
+                                        itemBuilder: (context,i){ return buildCommentItem(model: cubit.comments[i]);},
+                                        separatorBuilder: (context,i){return const SizedBox(height: 15.0);},
+                                        itemCount: cubit.comments.length,) :
+                                      const Center(child: Text("No Comments yet",style: TextStyle(fontWeight: FontWeight.w400,fontSize: 17),))
+                              ),
                           Row(
                             children:
                             [
@@ -77,7 +76,7 @@ class CommentsScreen extends StatelessWidget {
                                 ),
                               )
                             ],
-                          )
+                          ),
                         ],
                       ),
                     ),

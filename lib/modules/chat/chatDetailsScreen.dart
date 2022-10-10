@@ -5,9 +5,7 @@ import 'package:social_app/layouts/layoutCubit/layoutCubit.dart';
 import 'package:social_app/layouts/layoutCubit/layoutStates.dart';
 import 'package:social_app/models/messgaeDataModel.dart';
 import '../../models/user_data_model.dart';
-import '../../shared/components/components.dart';
 import '../../shared/styles/colors.dart';
-// this screen contain chat with messages between me and another user
 
 class ChatDetailsScreen extends StatelessWidget {
   TextEditingController messageController = TextEditingController();
@@ -17,7 +15,7 @@ class ChatDetailsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Builder(
       builder: (BuildContext context){
-        LayoutCubit.getCubit(context)..getMessages(messageReceiverID: receiverUserDataModel.userID!);
+        LayoutCubit.getCubit(context).getMessages(messageReceiverID: receiverUserDataModel.userID!);
         return BlocConsumer<LayoutCubit,LayoutStates>(
             listener: (context,state){
               if( state is SendMessageSuccessState )
@@ -49,36 +47,40 @@ class ChatDetailsScreen extends StatelessWidget {
                     children: [
                       state is GetMessageLoadingState ?
                         const Center(child: CupertinoActivityIndicator()) :
-                        ListView.separated(
-                          shrinkWrap: true,
-                          physics: const BouncingScrollPhysics(),
-                          itemBuilder: (context,i){
-                            return cubit.messages[i].messageSenderID == cubit.userData!.userID ?
-                            buildMyMessageItem(cubit.messages[i]) :
-                            buildReceiverMessageItem(cubit.messages[i]);
-                          },
-                          separatorBuilder: (context,i)=>const SizedBox(height: 12,),
-                          itemCount: cubit.messages.length,
+                        Expanded(
+                          child: ListView.separated(
+                            shrinkWrap: true,
+                            physics: const BouncingScrollPhysics(),
+                            itemBuilder: (context,i){
+                              return cubit.messages[i].messageSenderID == cubit.userData!.userID ?
+                              buildMyMessageItem(cubit.messages[i]) :
+                              buildReceiverMessageItem(cubit.messages[i]);
+                            },
+                            separatorBuilder: (context,i)=>const SizedBox(height: 12,),
+                            itemCount: cubit.messages.length,
+                          ),
                         ),
-                      const Spacer(),
-                      TextFormField(
-                        controller: messageController,
-                        onFieldSubmitted: (val)
-                        {
-                          cubit.sendMessage(message: messageController.text, messageReceiverID: receiverUserDataModel.userID!);
-                        },
-                        decoration: InputDecoration(
-                            hintText: "type your message here",
-                            contentPadding: const EdgeInsets.symmetric(vertical: 10,horizontal: 15),
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(25)),
-                            suffixIcon: IconButton(
-                              onPressed: ()
-                              {
-                                cubit.sendMessage(message: messageController.text, messageReceiverID: receiverUserDataModel.userID!);
-                              },
-                              color: Colors.teal,
-                              icon: const Icon(Icons.send),
-                            )
+                      Container(
+                        margin: const EdgeInsets.only(top: 10),
+                        child: TextFormField(
+                          controller: messageController,
+                          onFieldSubmitted: (val)
+                          {
+                            cubit.sendMessage(message: messageController.text, messageReceiverID: receiverUserDataModel.userID!);
+                          },
+                          decoration: InputDecoration(
+                              hintText: "type your message here",
+                              contentPadding: const EdgeInsets.symmetric(vertical: 10,horizontal: 15),
+                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(25)),
+                              suffixIcon: IconButton(
+                                onPressed: ()
+                                {
+                                  cubit.sendMessage(message: messageController.text, messageReceiverID: receiverUserDataModel.userID!);
+                                },
+                                color: Colors.teal,
+                                icon: const Icon(Icons.send),
+                              )
+                          ),
                         ),
                       )
                     ],

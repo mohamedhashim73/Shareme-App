@@ -64,9 +64,10 @@ Widget defaultTextButton({required Widget title,required Function() onTap,double
   );
 }
 
-void showDefaultSnackBar({required String message,required BuildContext context,required Color color}){
+void showDefaultSnackBar({required String message,required BuildContext context,required Color color,double elevation = 0 }){
   var snackBar = SnackBar(
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+    elevation: elevation,
     content: Text(message,textAlign: TextAlign.center,),
     clipBehavior: Clip.hardEdge,
     behavior: SnackBarBehavior.floating,

@@ -50,7 +50,6 @@ class CreatePostScreen extends StatelessWidget {
                       {
                         cubit.createPostWithoutImage(postCaption: captionController.text);
                       }
-                      //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
                     },
                   ),
                 )
@@ -58,11 +57,7 @@ class CreatePostScreen extends StatelessWidget {
             ),
             body: cubit.userData == null ?
             const Center(child: CircularProgressIndicator(color: mainColor,),) :
-            SizedBox(
-              height: double.infinity,
-              width: double.infinity,
-              child: buildPostItem(context: context, cubit: cubit),
-            ),
+            buildPostItem(context: context, cubit: cubit),
           );
         }
     );
@@ -72,73 +67,76 @@ class CreatePostScreen extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.only(left: 10,right: 5,top: 10),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Container(
-                  clipBehavior: Clip.hardEdge,
-                  height: 50,
-                  width: 50,
-                  decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.grey.withOpacity(0.5))
+        Expanded(
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(left: 10,right: 5,top: 10),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Container(
+                          clipBehavior: Clip.hardEdge,
+                          height: 50,
+                          width: 50,
+                          decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(color: Colors.grey.withOpacity(0.5))
+                          ),
+                          child : cubit.userData?.image != null? Image.network(cubit.userData!.image!,fit: BoxFit.cover,) : const Text("")
+                      ),
+                      const SizedBox(width: 15,),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(cubit.userData!.userName!,style: const TextStyle(fontSize: 16),),
+                          const SizedBox(height: 2,),
+                          Text(timeNow,style: Theme.of(context).textTheme.caption,),
+                        ],
+                      ),
+                      const Spacer(),
+                      GestureDetector(child: Icon(Icons.more_vert,color: blackColor.withOpacity(0.5),size: 25,),onTap: (){},),
+                    ],
                   ),
-                  child : cubit.userData?.image != null? Image.network(cubit.userData!.image!,fit: BoxFit.cover,) : const Text("")
-              ),
-              const SizedBox(width: 15,),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(cubit.userData!.userName!,style: const TextStyle(fontSize: 16),),
-                  const SizedBox(height: 2,),
-                  Text(timeNow,style: Theme.of(context).textTheme.caption,),
-                ],
-              ),
-              const Spacer(),
-              GestureDetector(child: Icon(Icons.more_vert,color: blackColor.withOpacity(0.5),size: 25,),onTap: (){},),
-            ],
-          ),
-        ),
-        const SizedBox(height: 10,),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          child: TextFormField(
-            maxLines: 3,
-            controller: captionController,
-            decoration: InputDecoration(
-                border: InputBorder.none,
-                contentPadding: const EdgeInsets.all(0),
-                hintText: "type your caption here...",
-                hintStyle: Theme.of(context).textTheme.caption!.copyWith(fontSize: 14)
+                ),
+                const SizedBox(height: 10,),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: TextFormField(
+                    maxLines: 2,
+                    controller: captionController,
+                    decoration: InputDecoration(
+                        border: InputBorder.none,
+                        contentPadding: const EdgeInsets.all(0),
+                        hintText: "type your caption here...",
+                        hintStyle: Theme.of(context).textTheme.caption!.copyWith(fontSize: 14)
+                    ),
+                  ),
+                ),
+                if( cubit.postImageFile != null )
+                  const SizedBox(height: 10,),
+                if( cubit.postImageFile != null )
+                  Stack(
+                    alignment: AlignmentDirectional.topEnd,
+                    children: [
+                      Container(
+                          width: double.infinity,
+                          child: Image(image: FileImage(cubit.postImageFile!))
+                        // Image.network(cubit.postImageUrl!,fit: BoxFit.fitHeight,height: 250),
+                      ),
+                      GestureDetector(
+                        onTap: (){
+                          cubit.canceledImageForPost();
+                        },
+                        child: Container(margin:const EdgeInsets.all(7.5),child: const CircleAvatar(radius: 15,child:Icon(Icons.close,size: 20,),)),
+                      ),
+                    ],
+                  ),
+              ],
             ),
           ),
         ),
-        if( cubit.postImageFile != null )
-        const SizedBox(height: 10,),
-        if( cubit.postImageFile != null )
-        Stack(
-          alignment: AlignmentDirectional.topEnd,
-          children: [
-            Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                  border: Border(top: BorderSide(color: Colors.grey.withOpacity(0.3),width: 1),bottom: BorderSide(color: Colors.grey.withOpacity(0.3),width: 1))
-              ),
-              child: Image(image: FileImage(cubit.postImageFile!),height: 250,fit: BoxFit.fitHeight)
-              // Image.network(cubit.postImageUrl!,fit: BoxFit.fitHeight,height: 250),
-            ),
-            GestureDetector(
-                onTap: (){
-                  cubit.canceledImageForPost();
-                },
-                child: Container(margin:const EdgeInsets.all(7.5),child: const CircleAvatar(radius: 15,child:Icon(Icons.close,size: 20,),)),
-            ),
-          ],
-        ),
-        // const SizedBox(height: 5,),
-        Spacer(),
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 8.0),
           child: Row(

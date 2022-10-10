@@ -124,3 +124,12 @@ class GetMessageLoadingState extends LayoutStates{}
 class DeletePersonSuccessfullyState extends LayoutStates{}
 
 class DeletePersonErrorState extends LayoutStates{}
+
+// related to search screen
+
+class SearchForUserLoadingState extends LayoutStates{}
+
+class SearchForUserSuccessState extends LayoutStates{}
+
+class SearchForUserErrorState extends LayoutStates{}
+

@@ -73,10 +73,10 @@ class LoginScreen extends StatelessWidget {
                         const SizedBox(height: 15,),
                         defaultTextButton(title: const Text("Forget Password?"),onTap:(){},width: double.infinity,alignment: Alignment.centerRight),
                         const SizedBox(height: 20,),
-                        state is UserLoginLoadingState ?   // check if complete for login or not
-                           const Center(child: CupertinoActivityIndicator(color: mainColor,),) :
-                           defaultButton(
-                            contentWidget: const Text("Sign In",style: TextStyle(color: whiteColor),),
+                        defaultButton(
+                            contentWidget: state is UserLoginLoadingState ?
+                                const Center(child: CircularProgressIndicator(color: whiteColor),) :
+                                const Text("Sign In",style: TextStyle(color: whiteColor),),
                             minWidth: double.infinity,
                             onTap: ()
                             {

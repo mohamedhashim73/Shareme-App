@@ -11,6 +11,11 @@ class CreateUserErrorState extends SignStates{
   CreateUserErrorState(this.error);
 }
 
+
+class ChosenUserImageSuccessfullyState extends SignStates{}
+
+class ChosenUserImageErrorState extends SignStates{}
+
 class SaveUserDataLoadingState extends SignStates{}
 
 class SaveUserDataSuccessState extends SignStates{}

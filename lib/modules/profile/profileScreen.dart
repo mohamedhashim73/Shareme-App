@@ -22,18 +22,6 @@ class ProfileScreen extends StatelessWidget {
                 const Center(child:  CircularProgressIndicator(color: mainColor,)) :
                 Scaffold(
                     appBar: AppBar(
-                      /*
-                      leading: leadingIconExist != false ?
-                          InkWell(
-                            child: const Icon(Icons.arrow_back_ios),
-                            onTap: ()
-                            {
-                              // Navigator.pushReplacementNamed(context, 'homeLayoutScreen');
-                            },
-                          ) :
-                          const Text(""),
-                       */
-                      // titleSpacing: 0,
                       title: defaultTextButton(
                           title: Row(
                             mainAxisSize: MainAxisSize.min,

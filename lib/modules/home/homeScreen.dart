@@ -11,14 +11,25 @@ import 'package:social_app/modules/profile/profileScreen.dart';
 import 'package:social_app/shared/styles/colors.dart';
 import '../../shared/components/components.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  @override
+  void initState() {
+    // TODO: implement initState
+    // LayoutCubit.getCubit(context).getUsersPosts();
+    super.initState();
+  }
   @override
   Widget build(BuildContext context) {
     return Builder(
       builder: (context) {
-        LayoutCubit.getCubit(context)..getUsersPosts()..getMyData();
+        LayoutCubit.getCubit(context)..getMyData()..getUsersPosts();
         return BlocConsumer<LayoutCubit,LayoutStates>(
             listener: (context,state){},
             builder: (context,state){
@@ -30,46 +41,54 @@ class HomeScreen extends StatelessWidget {
                   SizedBox(
                     height: double.infinity,
                     width: double.infinity,
-                    child: SingleChildScrollView(
-                      physics: const BouncingScrollPhysics(),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children:
-                        [
-                          GestureDetector(
-                            onTap: ()
-                            {
-                              Navigator.pushNamed(context, 'createPostScreen');
-                            },
-                            child: Container(
-                              margin: const EdgeInsets.symmetric(horizontal: 10,vertical: 5),
-                              child: Row(
-                                children:
-                                [
-                                  CircleAvatar(
-                                    radius: 27,
-                                    backgroundImage: cubit.userData != null ? NetworkImage(cubit.userData!.image!) : null,
-                                  ),
-                                  const SizedBox(width: 10,),
-                                  Expanded(
-                                      child: Container(
-                                        width: double.infinity,
-                                        padding: const EdgeInsets.symmetric(vertical: 10,horizontal: 15),
-                                        decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.circular(20),border: Border.all(color: Colors.grey.withOpacity(0.5))
-                                        ),
-                                        child: Text("What's on your mind ?",style: TextStyle(color: blackColor.withOpacity(0.7)),),
-                                      )
-                                  ),
-                                  const SizedBox(width: 7.5,),
-                                  const Icon(Icons.image,color: mainColor,size: 30,)
-                                ],
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children:
+                      [
+                        Container(
+                          margin: const EdgeInsets.symmetric(horizontal: 10,vertical: 5),
+                          child: Row(
+                            children:
+                            [
+                              GestureDetector(
+                                onTap: ()
+                                {
+                                  Navigator.push(context, MaterialPageRoute(builder: (context)=>ProfileScreen(leadingIconExist: true)));
+                                },
+                                child: CircleAvatar(
+                                  radius: 20,
+                                  backgroundImage: cubit.userData != null ? NetworkImage(cubit.userData!.image!) : null,
+                                ),
                               ),
-                            ),
+                              const SizedBox(width: 10,),
+                              Expanded(
+                                  child: GestureDetector(
+                                    onTap: (){
+                                      Navigator.pushNamed(context, 'createPostScreen');
+                                    },
+                                    child: Container(
+                                      width: double.infinity,
+                                      padding: const EdgeInsets.symmetric(vertical: 10,horizontal: 15),
+                                      decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(20),border: Border.all(color: Colors.grey.withOpacity(0.5))
+                                      ),
+                                      child: Text("What's on your mind ?",style: TextStyle(color: blackColor.withOpacity(0.7)),),
+                                    ),
+                                  )
+                              ),
+                              const SizedBox(width: 7.5,),
+                              GestureDetector(
+                                  onTap: (){
+                                    Navigator.pushNamed(context, 'createPostScreen');
+                                  },
+                                  child: const Icon(Icons.image,color: mainColor,size: 30,))
+                            ],
                           ),
-                          ListView.separated(
-                            physics: const NeverScrollableScrollPhysics(),
-                            shrinkWrap: true,
+                        ),
+                        Expanded(
+                          child: ListView.separated(
+                            physics: const BouncingScrollPhysics(),
+                            // shrinkWrap: true,
                             itemBuilder: (context,index){
                               return buildPostItem(
                                   context: context,
@@ -83,8 +102,8 @@ class HomeScreen extends StatelessWidget {
                             },
                             itemCount: cubit.usersPostsData.length,
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ) :
                   const Center(child: CupertinoActivityIndicator(color: mainColor,),),
@@ -94,6 +113,7 @@ class HomeScreen extends StatelessWidget {
       }
     );
   }
+
   Widget buildPostItem({required BuildContext context,required PostDataModel model,required LayoutCubit cubit,required int index}){
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -188,28 +208,14 @@ class HomeScreen extends StatelessWidget {
         const SizedBox(height: 12.5,),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12.0),
-          child: Row(
-            children: [
-              Expanded(
-                child: InkWell(
-                    onTap: ()
-                    {
-                      Navigator.push(context, MaterialPageRoute(builder: (context){return LikesViewScreen(postID: cubit.postsID[index], postMakerID: model.userID!);}));
-                    },
-                    child: Text("0 likes",style: Theme.of(context).textTheme.caption,)),
-                    // Text("${cubit.likesNumber[index]} likes",style: Theme.of(context).textTheme.caption,)),
-              ),
-              Expanded(
-                child: InkWell(
-                  onTap: ()
-                  {
-                    Navigator.push(context, MaterialPageRoute(builder: (context){return CommentsScreen(postID: cubit.postsID[index], postMakerID: model.userID!,);}));
-                  },
-                    child: Align(
-                        alignment:AlignmentDirectional.topEnd,
-                        child: Text("${cubit.commentsNumber.isEmpty? "0" : cubit.commentsNumber[index]} comments", style: Theme.of(context).textTheme.caption,))),
-              )
-            ],
+          child: Align(
+            alignment: AlignmentDirectional.topStart,
+            child: InkWell(
+                onTap: ()
+                {
+                  Navigator.push(context, MaterialPageRoute(builder: (context){return LikesViewScreen(postID: cubit.postsID[index], postMakerID: model.userID!);}));
+                },
+                child: Text("0 likes",style: Theme.of(context).textTheme.caption,)),
           ),
         ),
         buildDividerItem(),
@@ -269,7 +275,7 @@ class HomeScreen extends StatelessWidget {
                     InkWell(
                       onTap: ()
                       {
-                        Navigator.push(context, MaterialPageRoute(builder: (context)=>ProfileScreen()));
+                        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>ProfileScreen()));
                       },
                       child: CircleAvatar(
                         radius: 15,
@@ -302,5 +308,4 @@ class HomeScreen extends StatelessWidget {
       ],
     );
   }
-
 }

@@ -30,7 +30,7 @@ class LayoutCubit extends Cubit<LayoutStates>{
     emit(ChangeBottomNavIndexState());
   }
 
-  List<Widget> layoutWidgets = [ const HomeScreen(), const SearchScreen(), const ChatScreen(), ProfileScreen(),];
+  List<Widget> layoutWidgets = [ const HomeScreen(), SearchScreen(), const ChatScreen(), ProfileScreen(),];
 
   /*
     1) get My Data to show in Profile screen and use it in other screens
@@ -148,6 +148,7 @@ class LayoutCubit extends Cubit<LayoutStates>{
     final model = PostDataModel(userData!.userName, userData!.userID, userData!.image,postCaption,timeNow.toString(),postImage?? "");
     FirebaseFirestore.instance.collection('users').doc(userData!.userID).collection('posts')
         .add(model.toJson()).then((value){
+          getUsersPosts();
       emit(UploadPostWithoutImageSuccessState()); // success
     }).catchError((error){print(error.toString());emit(UploadPostWithoutImageErrorState());});
   }
@@ -227,25 +228,22 @@ class LayoutCubit extends Cubit<LayoutStates>{
   List<String> postsID = [];
   List<int> commentsNumber = [];  // use this var only to show the number of posts but if i want to display all comments i will use getComments() method for specific post using its ID and postMakerID
   void getUsersPosts(){
-    print("Start get posts for all users before listen to data");
-    FirebaseFirestore.instance.collection('users').snapshots().listen((value){
-      print("Start listen to get posts for all users **************************");
-      commentsNumber = [];
-      usersPostsData = [];
-      postsID = [];
+    FirebaseFirestore.instance.collection('users').get().then((value){
       value.docs.forEach((element){
-        element.reference.collection('posts').get().then((val){
-          val.docs.forEach((postData){  // postData => post ذات نفسه
+        element.reference.collection('posts').snapshots().listen((event){
+          commentsNumber = [];
+          usersPostsData = [];
+          postsID = [];
+          event.docs.forEach((postData){  // postData => post ذات نفسه
             postData.reference.collection('comments').get().then((val){
               commentsNumber.add(val.docs.length);
               postsID.add(postData.id);   // store posts ID to use it when i add a comment
               usersPostsData.add(PostDataModel.fromJson(json: postData.data()));
-              print("get posts for first time #######################");
+              emit(GetUsersPostsSuccessState(usersPostsData.length));
             });
           });
         });
       });
-      emit(GetUsersPostsSuccessState(usersPostsData.length));
     });
   }
 
@@ -343,20 +341,19 @@ class LayoutCubit extends Cubit<LayoutStates>{
 
   List<MessageDataModel> messages = [];
   void getMessages({required String messageReceiverID}) {
-    print("start get message ************************ messages are ${messages}");
     emit(GetMessageLoadingState());
     FirebaseFirestore.instance.collection('users').doc(userData!.userID).collection('chats').doc(messageReceiverID).collection('messages')
         .orderBy('messageDateTime')
         .snapshots()
         .listen((val)
          {
-           print("start listen to getting message as a real time ########################## messages are $messages");
            messages = [];
            val.docs.forEach((element) {
              messages.add(MessageDataModel.fromJson(json: element.data()));
            });
+           // الفكره هنا ان كل اما يجيب مسدج بعمل refresh لل UI ف عشان كده ظهرت ع طول وده لازم اعملها في صفحه home screen
+           emit(GetMessageSuccessState());
          });
-    emit(GetMessageSuccessState());
   }
 
   // ***************************************************************************
@@ -368,4 +365,19 @@ class LayoutCubit extends Cubit<LayoutStates>{
       emit(DeletePersonSuccessfullyState());
     }).catchError((error)=>emit(DeletePersonErrorState()));
   }
+  
+  // related to search screen (( search for user by his userName ))
+  List<UserDataModel> searchData = [];
+  void searchForUser({required String input}){
+    emit(SearchForUserLoadingState());
+    // arrayContain will get all userName that contain input which user will type on textFormField
+    FirebaseFirestore.instance.collection('users').where('userName',arrayContains: input).get().then((value){
+      for (var element in value.docs) 
+      { 
+        searchData.add(UserDataModel.fromJson(element.data()));
+      }
+      emit(SearchForUserSuccessState());
+    }).catchError((error){emit(SearchForUserErrorState());});
+  }
+
 }

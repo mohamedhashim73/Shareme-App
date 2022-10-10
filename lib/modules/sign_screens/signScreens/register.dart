@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:social_app/modules/create_userImage_screen/create_userImage_Screen.dart';
+import 'package:social_app/layouts/homeLayoutScreen/home_layout_screen.dart';
 import 'package:social_app/modules/sign_screens/cubit/signCubit.dart';
 import '../../../shared/components/components.dart';
 import '../../../shared/styles/colors.dart';
@@ -12,6 +12,7 @@ class RegisterScreen extends StatelessWidget {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final userNameController = TextEditingController();
+  final bioController = TextEditingController();
   final formKey = GlobalKey<FormState>();
 
   RegisterScreen({super.key});
@@ -31,11 +32,11 @@ class RegisterScreen extends StatelessWidget {
           }
           if(state is SaveUserDataSuccessState)
           {
-            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=> CreateUserImageScreen()));
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=> HomeLayoutScreen()));
           }
         },
         builder: (context,state){
-          SignCubit cubit = SignCubit.get(context);
+          final cubit = SignCubit.get(context);
           return Scaffold(
             body: Center(
               child: SingleChildScrollView(
@@ -48,7 +49,42 @@ class RegisterScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children:
                       [
-                        const Text("Sign Up",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 20),),
+                        Center(
+                          child: Stack(
+                            alignment: AlignmentDirectional.center,
+                            children: [
+                              Container(
+                                height: 125,
+                                width: 125,
+                                clipBehavior: Clip.hardEdge,
+                                decoration: const BoxDecoration(shape: BoxShape.circle,color: mainColor),
+                              ),
+                              Stack(
+                                alignment: AlignmentDirectional.topEnd,
+                                children: [
+                                  Container(
+                                    height: 120,
+                                    width: 120,
+                                    clipBehavior: Clip.hardEdge,
+                                    decoration: const BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: whiteColor,
+                                    ),
+                                    child: cubit.userImageFile != null ?
+                                    Image(image: FileImage(cubit.userImageFile!)) :
+                                    const Text(""),
+                                  ),
+                                  InkWell(
+                                    onTap: (){
+                                      cubit.getUserImageFile();
+                                    },
+                                    child: const CircleAvatar(maxRadius: 15,child: Icon(Icons.photo_camera,size: 20,),),
+                                  ),
+                                ],
+                              )
+                            ],
+                          ),
+                        ),
                         const SizedBox(height: 20,),
                         defaultTextFormField(
                             inputType: TextInputType.name,
@@ -58,6 +94,17 @@ class RegisterScreen extends StatelessWidget {
                             validateMethod: (val)
                             {
                               return emailController.text.isEmpty ? "UserName must not be empty" : null ;
+                            }
+                        ),
+                        const SizedBox(height: 10,),
+                        defaultTextFormField(
+                            inputType: TextInputType.text,
+                            controller: bioController,
+                            prefixIcon: Icons.text_snippet_outlined,
+                            hint: "Bio",
+                            validateMethod: (val)
+                            {
+                              return bioController.text.isEmpty ? "Bio must not be empty" : null ;
                             }
                         ),
                         const SizedBox(height: 10,),
@@ -88,21 +135,29 @@ class RegisterScreen extends StatelessWidget {
                             }
                         ),
                         const SizedBox(height: 20,),
-                        state is CreateUserLoadingState || state is SaveUserDataLoadingState || state is CreateUserSuccessState ?
-                            const Center(child: CupertinoActivityIndicator(color: mainColor,),) :
-                            defaultButton(
-                                contentWidget: const Text("Sign Up",style: TextStyle(color: whiteColor),),
-                                minWidth: double.infinity,
-                                onTap: ()
-                                {
-                                  cubit.createUser(userName:userNameController.text,email: emailController.text, password: passwordController.text);
-                                },
-                                padding: const EdgeInsets.all(10),
-                                roundedRectangleBorder: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25.0))
-                            ),
+                        defaultButton(
+                            contentWidget: state is CreateUserLoadingState || state is SaveUserDataLoadingState || state is CreateUserSuccessState ?
+                                const Center(child: CircularProgressIndicator(color: whiteColor),) :
+                                const Text("Sign Up",style: TextStyle(color: whiteColor),),
+                            minWidth: double.infinity,
+                            onTap: ()
+                            {
+                              if( cubit.userImageFile != null && formKey.currentState!.validate() )
+                              {
+                                cubit.createUser(userName:userNameController.text,email: emailController.text, password: passwordController.text,bio: bioController.text);
+                              }
+                              else if ( cubit.userImageFile == null)
+                              {
+                                showDefaultSnackBar(message: "choose an Image and try again!", context: context, color: Colors.grey.withOpacity(1));
+                              }
+                              },
+                            padding: const EdgeInsets.all(10),
+                            roundedRectangleBorder: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25.0))
+                        ),
                         const SizedBox(height: 15,),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
                             const Text("Already have an account?... "),
                             defaultTextButton(
