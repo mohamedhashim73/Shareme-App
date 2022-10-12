@@ -23,7 +23,7 @@ class EditPostScreen extends StatelessWidget{
           if( state is UpdatePostSuccessfullyState )
           {
             showDefaultSnackBar(message: "Post Updated successfully!", context: context, color: Colors.grey);
-            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>ProfileScreen(leadingIconExist: true,)));
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>ProfileScreen()));
             LayoutCubit.getCubit(context).postImageFile = null ;
           }
         },

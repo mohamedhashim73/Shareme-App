@@ -9,28 +9,24 @@ import '../../shared/styles/colors.dart';
 
 class CommentsScreen extends StatelessWidget {
   final commentController = TextEditingController();
+  int? postIndex ;    // عشان هاخده م صفحه home وهلعب علي قيمته بحيث تتغير في صفحه home بعد اضافه comment
   String postMakerID;
   String postID;  // to enable to get the comments for this post
-  CommentsScreen({super.key,required this.postID,required this.postMakerID});
+  CommentsScreen({super.key,required this.postID,required this.postMakerID,this.postIndex});
   @override
   Widget build(BuildContext context) {
     return Builder(
       builder: (context) {
         LayoutCubit.getCubit(context).getComments(postMakerID: postMakerID, postID: postID);
         return BlocConsumer<LayoutCubit,LayoutStates>(
-            listener: (context,state){
-              if( state is AddCommentSuccessState )
-                {
-                  commentController.text = '';
-                }
-            },
+            listener: (context,state){},
             builder: (context,state){
               final cubit = LayoutCubit.getCubit(context);
               return Scaffold(
                 appBar: AppBar(
                   titleSpacing: 0,
                   title: const Text("Comments"),
-                  leading: defaultTextButton(title: const Icon(Icons.arrow_back_ios), onTap: (){Navigator.pushReplacementNamed(context, 'homeLayoutScreen');}),
+                  leading: defaultTextButton(title: const Icon(Icons.arrow_back_ios), onTap: (){Navigator.pop(context);}),
                 ),
                 body: Padding(
                       padding: const EdgeInsets.symmetric(vertical: 10,horizontal: 15.0),
@@ -60,19 +56,29 @@ class CommentsScreen extends StatelessWidget {
                               ),
                               const SizedBox(width: 10,),
                               Expanded(
-                                child: TextFormField(
-                                  controller: commentController,
-                                  onFieldSubmitted: (val)
-                                  {
-                                    // postIndex will get it when i call this screen from homeScreen to use it to increase the number by one after add a comments
-                                    cubit.addComment(comment: val,postID:postID);
+                                // عملت stateFulBuilder عشان عاوز اعمل ريفرش بس لقيمه عدد الكومنتات وكذالك commentController
+                                child: StatefulBuilder(
+                                  builder: (context,setState){
+                                    return TextFormField(
+                                      controller: commentController,
+                                      onFieldSubmitted: (val)
+                                      {
+                                        // postIndex will get it when i call this screen from homeScreen to use it to increase the number by one after add a comments
+                                        // cubit.addComment(comment: val,postID:postID);
+                                        cubit.addComment(comment: val,postID:postID);
+                                        setState((){
+                                          commentController.text = '';
+                                          cubit.commentsNumber[postIndex!] = cubit.commentsNumber[postIndex!] + 1 ;
+                                        });
+                                      },
+                                      decoration: InputDecoration(
+                                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(22),borderSide: BorderSide(color: Colors.grey.withOpacity(0.2))),
+                                        contentPadding: const EdgeInsets.symmetric(vertical: 5,horizontal: 12.0),
+                                        hintText: "add a new comment...",
+                                        hintStyle: Theme.of(context).textTheme.caption!.copyWith(fontSize: 14),
+                                      ),
+                                    );
                                   },
-                                  decoration: InputDecoration(
-                                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(22),borderSide: BorderSide(color: Colors.grey.withOpacity(0.2))),
-                                    contentPadding: const EdgeInsets.symmetric(vertical: 5,horizontal: 12.0),
-                                    hintText: "add a new comment...",
-                                    hintStyle: Theme.of(context).textTheme.caption!.copyWith(fontSize: 14),
-                                  ),
                                 ),
                               )
                             ],

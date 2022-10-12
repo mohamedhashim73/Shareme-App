@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:social_app/layouts/commentsViewScreen/commentsViewScreen.dart';
+import 'package:social_app/layouts/homeLayoutScreen/home_layout_screen.dart';
 import 'package:social_app/layouts/layoutCubit/layoutCubit.dart';
 import 'package:social_app/layouts/layoutCubit/layoutStates.dart';
 import 'package:social_app/layouts/likesViewScreen/likesViewScreen.dart';
@@ -11,34 +12,26 @@ import 'package:social_app/modules/profile/profileScreen.dart';
 import 'package:social_app/shared/styles/colors.dart';
 import '../../shared/components/components.dart';
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
-  @override
-  State<HomeScreen> createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends State<HomeScreen> {
-  @override
-  void initState() {
-    // TODO: implement initState
-    // LayoutCubit.getCubit(context).getUsersPosts();
-    super.initState();
-  }
   @override
   Widget build(BuildContext context) {
     return Builder(
       builder: (context) {
         LayoutCubit.getCubit(context)..getMyData()..getUsersPosts();
         return BlocConsumer<LayoutCubit,LayoutStates>(
-            listener: (context,state){},
+            listener: (context,state)
+            {
+              // it was only when i upload post successfully state
+              if( state is UploadPostWithoutImageSuccessState || state is DeletePostSuccessfullyState || state is UpdatePostSuccessfullyState) LayoutCubit.getCubit(context)..getMyData()..getUsersPosts();
+            },
             builder: (context,state){
               final cubit = LayoutCubit.getCubit(context);
               return Scaffold(
                 backgroundColor: whiteColor,
                 appBar: AppBar(leading: const Text(""),leadingWidth: 0,title: const Text("Feed"),toolbarHeight: 45,),
-                body: cubit.userData != null ?  // mean that there is no posts for all users on FireStore
-                  SizedBox(
+                body: SizedBox(
                     height: double.infinity,
                     width: double.infinity,
                     child: Column(
@@ -53,7 +46,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               GestureDetector(
                                 onTap: ()
                                 {
-                                  Navigator.push(context, MaterialPageRoute(builder: (context)=>ProfileScreen(leadingIconExist: true)));
+                                  Navigator.push(context, MaterialPageRoute(builder: (context)=>ProfileScreen()));
                                 },
                                 child: CircleAvatar(
                                   radius: 20,
@@ -85,28 +78,30 @@ class _HomeScreenState extends State<HomeScreen> {
                             ],
                           ),
                         ),
-                        Expanded(
-                          child: ListView.separated(
-                            physics: const BouncingScrollPhysics(),
-                            // shrinkWrap: true,
-                            itemBuilder: (context,index){
-                              return buildPostItem(
-                                  context: context,
-                                  cubit: cubit,
-                                  model: cubit.usersPostsData[index],
-                                  index: index
-                              );
-                            },
-                            separatorBuilder: (context,i){
-                              return const Divider(thickness: 1,height: 3,);
-                            },
-                            itemCount: cubit.usersPostsData.length,
-                          ),
-                        ),
+                        cubit.userData != null && cubit.likesPostsData != null ?
+                              Expanded(
+                                child: ListView.separated(
+                                  physics: const BouncingScrollPhysics(),
+                                  // shrinkWrap: true,
+                                  itemBuilder: (context,index){
+                                    return buildPostItem(
+                                        context: context,
+                                        cubit: cubit,
+                                        model: cubit.usersPostsData[index],
+                                        index: index,
+                                        state: state,
+                                    );
+                                  },
+                                  separatorBuilder: (context,i){
+                                    return const Divider(thickness: 1,height: 3,);
+                                  },
+                                  itemCount: cubit.usersPostsData.length,
+                                ),
+                              ) :
+                              const Center(child: CupertinoActivityIndicator(color: mainColor),),
                       ],
                     ),
-                  ) :
-                  const Center(child: CupertinoActivityIndicator(color: mainColor,),),
+                  ),
               );
             }
         );
@@ -114,7 +109,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget buildPostItem({required BuildContext context,required PostDataModel model,required LayoutCubit cubit,required int index}){
+  Widget buildPostItem({required BuildContext context,required PostDataModel model,required LayoutCubit cubit,required int index,required LayoutStates state}){
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.start,
@@ -155,7 +150,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 onTap: ()
                 {
                   // meaning that if the postMakerID not equal my ID so I don't have a permission to do this
-                  if ( cubit.usersPostsData[index].userID == cubit.userData!.userID)
+                  if ( cubit.usersPostsData[index].userID == cubit.userData!.userID )
                   {
                     showMenu(
                         context: context,
@@ -179,6 +174,13 @@ class _HomeScreenState extends State<HomeScreen> {
                               cubit.deletePost(postMakerID: cubit.usersPostsData[index].userID!, postID: cubit.postsID[index]);
                             },
                             child: const Text('delete post'),
+                          ),
+                          PopupMenuItem(
+                            onTap: ()
+                            {
+                              cubit.deleteUser(personID: cubit.usersPostsData[index].userID!,);
+                            },
+                            child: const Text('delete User'),
                           ),
                         ]
                     );
@@ -208,15 +210,46 @@ class _HomeScreenState extends State<HomeScreen> {
         const SizedBox(height: 12.5,),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12.0),
-          child: Align(
-            alignment: AlignmentDirectional.topStart,
-            child: InkWell(
-                onTap: ()
-                {
-                  Navigator.push(context, MaterialPageRoute(builder: (context){return LikesViewScreen(postID: cubit.postsID[index], postMakerID: model.userID!);}));
-                },
-                child: Text("0 likes",style: Theme.of(context).textTheme.caption,)),
-          ),
+          child: Row(
+            children: [
+              /*
+              Expanded(
+                child: Align(
+                  alignment: AlignmentDirectional.topStart,
+                  child: InkWell(
+                      onTap: ()
+                      {
+
+                        Navigator.push(context, MaterialPageRoute(builder: (context){return LikesViewScreen(postID: cubit.postsID[index], postMakerID: model.userID!);}));
+                      },
+                      child: cubit.likesNumber[index] != null ?
+                      Text("${cubit.likesNumber[index]} likes",style: Theme.of(context).textTheme.caption,) :
+                      Text("0 likes",style: Theme.of(context).textTheme.caption,),
+                  ),
+                ),
+              ),
+               */
+              Expanded(
+                child: Align(
+                  alignment: AlignmentDirectional.topStart,
+                  child: InkWell(
+                      onTap: ()
+                      {
+                        Navigator.push(context, MaterialPageRoute(builder: (context){return CommentsScreen(postID: cubit.postsID[index], postMakerID: model.userID!,postIndex: index,);}));
+                      },
+                      child: cubit.commentsNumber[index] != null ?
+                      Text("${cubit.commentsNumber[index]} comments",style: Theme.of(context).textTheme.caption,) :
+                      Text("0 comments",style: Theme.of(context).textTheme.caption,),
+                    /*
+                    child: cubit.commentsNumber[index] != null ?
+                      Text("${state is AddCommentSuccessState ? cubit.commentsNumber[index]+1 : cubit.commentsNumber[index]} comments",style: Theme.of(context).textTheme.caption,) :
+                      Text("0 comments",style: Theme.of(context).textTheme.caption,),
+                     */
+                  ),
+                ),
+              ),
+            ],
+          )
         ),
         buildDividerItem(),
         Padding(
@@ -227,14 +260,40 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    GestureDetector(
-                        onTap:()
-                          {
-                          },
-                        child: const Icon(Icons.favorite,color: Colors.grey,size: 22),
+                    SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: StatefulBuilder(
+                        builder: (context,setstate){
+                          return GestureDetector(
+                              onTap:()
+                              {
+                                setstate((){
+                                  if( cubit.likesPostsData[index] == true )
+                                  {
+                                    cubit.removeLike(postID: cubit.postsID[index]);
+                                    cubit.likesPostsData[index] = false ;
+                                  }
+                                  else
+                                  {
+                                    cubit.addLike(postID: cubit.postsID[index]);
+                                    cubit.likesPostsData[index] = true ;   // لأن انا بلعب علي لو قيمتها لا تساوي صفر يبقي كده في قيمه
+                                  }
+                                });
+                              },
+                              // عملت لا يساوي صفر عشان انا قلت لو id مش نفسه بتاعي خزن صفر طب لو بتاعي هخزن الداتا بتاعت likePostData في List عشان اعرضها في صفحه اللايكات
+                              child: Icon(Icons.favorite,color: cubit.likesPostsData[index] == false || cubit.likesPostsData[index] == null ? Colors.grey : Colors.red,size: 22)
+                          );
+                        },
+                      ),
                     ),
-                    const SizedBox(width: 7,),
-                    Text("likes",style: Theme.of(context).textTheme.caption),
+                    const SizedBox(width: 7),
+                    GestureDetector(
+                      onTap: ()
+                      {
+                        Navigator.push(context, MaterialPageRoute(builder: (context)=>LikesViewScreen(postID: cubit.postsID[index], postMakerID: cubit.usersPostsData[index].userID!)));
+                      },
+                        child: Text("like",style: Theme.of(context).textTheme.caption)),
                   ],
                 ),
               ),
@@ -242,7 +301,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    GestureDetector(onTap:(){},child: const Icon(Icons.messenger_outline,color: Colors.grey,size: 22,)),
+                    GestureDetector(
+                        onTap:()
+                        {
+                          Navigator.push(context, MaterialPageRoute(builder: (context){return CommentsScreen(postID: cubit.postsID[index], postMakerID: model.userID!,postIndex: index,);}));
+                        },child: const Icon(Icons.messenger_outline,color: Colors.grey,size: 22,)),
                     const SizedBox(width: 7,),
                     Text("comments",style: Theme.of(context).textTheme.caption),
                   ],
@@ -287,7 +350,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: InkWell(
                           onTap: ()
                           {
-                            Navigator.push(context, MaterialPageRoute(builder: (context){return CommentsScreen(postID: cubit.postsID[index], postMakerID: model.userID!);}));
+                            Navigator.push(context, MaterialPageRoute(builder: (context){return CommentsScreen(postID: cubit.postsID[index], postMakerID: model.userID!,postIndex: index,);}));
                           },
                           child: Container(
                             padding: const EdgeInsets.all(10),

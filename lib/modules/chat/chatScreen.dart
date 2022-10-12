@@ -20,7 +20,7 @@ class ChatScreen extends StatelessWidget {
             builder: (context,state){
               final cubit = LayoutCubit.getCubit(context);
               return Scaffold(
-                appBar: AppBar(leading: const Text(''),leadingWidth:0,title: Text("Chat"),),
+                appBar: AppBar(leading: const Text(''),leadingWidth:0,title: const Text("Chats"),),
                 body: cubit.usersData.isEmpty ?
                 const Center(child: CupertinoActivityIndicator()) :
                 ListView.separated(

@@ -148,7 +148,6 @@ class LayoutCubit extends Cubit<LayoutStates>{
     final model = PostDataModel(userData!.userName, userData!.userID, userData!.image,postCaption,timeNow.toString(),postImage?? "");
     FirebaseFirestore.instance.collection('users').doc(userData!.userID).collection('posts')
         .add(model.toJson()).then((value){
-          getUsersPosts();
       emit(UploadPostWithoutImageSuccessState()); // success
     }).catchError((error){print(error.toString());emit(UploadPostWithoutImageErrorState());});
   }
@@ -167,10 +166,7 @@ class LayoutCubit extends Cubit<LayoutStates>{
         print("Error during upload post Image => ${e.toString()}");
         emit(UploadImageForPostErrorState());  // error during upload postImage not totally Post
       });
-    })
-    .catchError((onError){
-      emit(UploadPostWithImageErrorState());  // error during upload Posts totally
-    });
+    }).catchError((onError) {emit(UploadPostWithImageErrorState());});
   }
 
   void updatePost({required String postMakerID,required String postID,required String postMakerName,required String postMakerImage,required String postCaption,required String postDate,required String postImage}){
@@ -178,15 +174,12 @@ class LayoutCubit extends Cubit<LayoutStates>{
     final model = PostDataModel(postMakerName, postMakerID, postMakerImage, postCaption, postDate, postImage);
     FirebaseFirestore.instance.collection('users').doc(postMakerID).collection('posts').doc(postID).update(model.toJson()).then((value)
     {
-      getUsersPosts();   // it is possible to not call it if i use real time when i get posts for users as in this case will listen for changes
       emit(UpdatePostSuccessfullyState());
     }).catchError((e)=>emit(UpdatePostErrorState()));
   }
 
   void deletePost({required String postMakerID,required String postID}){
     FirebaseFirestore.instance.collection('users').doc(postMakerID).collection('posts').doc(postID).delete().then((value){
-      getUsersPosts();
-      // يفترض يحصل تحديث ف البوستات لان مستعمل real time
       emit(DeletePostSuccessfullyState());
     }).catchError((e)=>emit(DeletePostErrorState()));
   }
@@ -204,19 +197,22 @@ class LayoutCubit extends Cubit<LayoutStates>{
 
   List<PostDataModel> userPostsData = [];    // as i send data as PostDataModel to FireStore
   List<String> myPostsID = [];
+  List<int> myCommentsNumber = [];  // عشان اعرض عدد comments علي كل بوست في صفحه profile screen بتاعتي
   void getMyPosts(){
+    userPostsData = [];
+    myPostsID = [];
+    myCommentsNumber = [];
     emit(GetUserPostsLoadingState());
-    FirebaseFirestore.instance.collection('users').doc(CacheHelper.getCacheData(key: 'uid')??userData!.userID).collection('posts').snapshots()
-        .listen((value){
-      userPostsData = [];
-      myPostsID = [];
-      value.docs.forEach((element){
-        print("Your ID for your posts are ${element.id}");
-        myPostsID.add(element.id);
-        userPostsData.add(PostDataModel.fromJson(json: element.data()));
-        emit(GetUserPostsSuccessState());
-      });
-    });
+    FirebaseFirestore.instance.collection('users').doc(userData!.userID!).collection('posts').get().then((value){
+          value.docs.forEach((element){
+            element.reference.collection('comments').get().then((value){
+              myCommentsNumber.add(value.docs.length);
+              myPostsID.add(element.id);
+              userPostsData.add(PostDataModel.fromJson(json: element.data()));
+              emit(GetUserPostsSuccessState());
+            });
+          });
+        });
   }
 
   // ***************************************************************************
@@ -226,20 +222,67 @@ class LayoutCubit extends Cubit<LayoutStates>{
   */
   List<PostDataModel> usersPostsData = [];
   List<String> postsID = [];
-  List<int> commentsNumber = [];  // use this var only to show the number of posts but if i want to display all comments i will use getComments() method for specific post using its ID and postMakerID
+  List<bool> likesPostsData = [];
+  List<int> commentsNumber = [];  // عشان اعرض عدد comments علي كل بوست في صفحه homeScreen
   void getUsersPosts(){
+    // انا صفرت lists في بدايه الداله عشان اما اقفل التطبيق وافتحه من تاي اما يجيب الداتا م الاول ميحصلش تراكم
+    commentsNumber = [];
+    usersPostsData = [];
+    postsID = [];
+    likesPostsData = [];
     FirebaseFirestore.instance.collection('users').get().then((value){
+      // ممكن تكون المشكله هنا اما اعمل تعديل علي بوست او احذف واحد او اعمل كومنت
+      commentsNumber = [];
+      usersPostsData = [];
+      postsID = [];
+      likesPostsData = [];
       value.docs.forEach((element){
         element.reference.collection('posts').snapshots().listen((event){
-          commentsNumber = [];
-          usersPostsData = [];
-          postsID = [];
           event.docs.forEach((postData){  // postData => post ذات نفسه
+            // ده خاصه بالحصول علي الداتا لكل بوست وكذالك عدد الكومنتات
             postData.reference.collection('comments').get().then((val){
-              commentsNumber.add(val.docs.length);
-              postsID.add(postData.id);   // store posts ID to use it when i add a comment
-              usersPostsData.add(PostDataModel.fromJson(json: postData.data()));
-              emit(GetUsersPostsSuccessState(usersPostsData.length));
+              commentsNumber = [];
+              usersPostsData = [];
+              likesPostsData = [];
+              postsID = [];
+              postData.reference.collection('likes').get().then((value){
+                // هنا هتحقق اذا كان في لايكات اصلا ولا اي بالضبط وف نفس الوقت اللي بجيب فيه اللايكات هروح اجيب البوست ذات نفسه وكذالك عدد الكومنتات بتاعته عشان ميحصلش لغبطه بين البوستات
+                if( value.docs.isEmpty )
+                {
+                  likesPostsData.add(false);
+                  print(likesPostsData.toString());
+                  // ده خاصه بالحصول علي الداتا لكل بوست وكذالك عدد الكومنتات
+                  commentsNumber.add(val.docs.length);
+                  postsID.add(postData.id);   // store posts ID to use it when I add a comment || get comments for specific post
+                  usersPostsData.add(PostDataModel.fromJson(json: postData.data()));
+                  emit(GetUsersPostsSuccessState(usersPostsData.length));
+                }
+                else
+                {
+                  value.docs.forEach((element)
+                  {
+                    if( element.data()['likeMakerID'] == userData!.userID )
+                      {
+                        likesPostsData.add(true);
+                        // ده خاصه بالحصول علي الداتا لكل بوست وكذالك عدد الكومنتات
+                        commentsNumber.add(val.docs.length);
+                        postsID.add(postData.id);   // store posts ID to use it when I add a comment || get comments for specific post
+                        usersPostsData.add(PostDataModel.fromJson(json: postData.data()));
+                        emit(GetUsersPostsSuccessState(usersPostsData.length));
+                      }
+                    // مهمه جدا ........ الحل ان هنا ممكن يدخل وميلاقيش انا عامل لايك فهخليه يأخد قيمه false
+                    else
+                      {
+                        likesPostsData.add(false);
+                        // ده خاصه بالحصول علي الداتا لكل بوست وكذالك عدد الكومنتات
+                        commentsNumber.add(val.docs.length);
+                        postsID.add(postData.id);   // store posts ID to use it when I add a comment || get comments for specific post
+                        usersPostsData.add(PostDataModel.fromJson(json: postData.data()));
+                        emit(GetUsersPostsSuccessState(usersPostsData.length));
+                      }
+                  });
+                }
+              });
             });
           });
         });
@@ -253,25 +296,27 @@ class LayoutCubit extends Cubit<LayoutStates>{
     7) add a like to a post || remove it
   */
 
-  void addLike({required String postID,required bool isLike}){
-    final model = LikeDataModel(userData!.image,userData!.userID,userData!.userName,DateTime.now().toString(),isLike);
+  void addLike({required String postID}){
+    final model = LikeDataModel(userData!.image,userData!.userID,userData!.userName,DateTime.now().toString(),true);
     FirebaseFirestore.instance.collection('users').get().then((value){
       value.docs.forEach((element) {
         element.reference.collection('posts').doc(postID).collection('likes').doc(userData!.userID).set(model.toJson()).then((value){
-          emit(AddLikeSuccessfullyState());   // add like successfully
+          // getUsersPosts();
         });
       });
-    }).catchError((error)=>emit(AddLikeErrorState())); // error during add a comment to specific post
+      emit(AddLikeSuccessfullyState());
+    }); // error during add a comment to specific post
   }
 
   void removeLike({required String postID}){
     FirebaseFirestore.instance.collection('users').get().then((value){
       value.docs.forEach((element) {
         element.reference.collection('posts').doc(postID).collection('likes').doc(userData!.userID).delete().then((val){
-          emit(RemoveLikeSuccessfullyState());   // add like successfully
+             // add like successfully
         });
       });
-    }).catchError((error)=>emit(RemoveLikeErrorState())); // error during add a comment to specific post
+      emit(RemoveLikeSuccessfullyState());
+    });
   }
 
   // get likes for specific post throw its id and show it in separated screen
@@ -281,8 +326,6 @@ class LayoutCubit extends Cubit<LayoutStates>{
     FirebaseFirestore.instance.collection('users').doc(postMakerID).collection('posts').doc(postID).collection('likes').snapshots().listen((value){
       likesData = [];
       value.docs.forEach((element){
-        print("isLike status is ${element.data()['isLike']}\n");
-        print("isLike status is ${element.data()['dateTime']}");
         if( element.data()['isLike'] == true )
         {
           likesData.add(LikeDataModel.fromJson(json: element.data()));
@@ -304,9 +347,9 @@ class LayoutCubit extends Cubit<LayoutStates>{
       value.docs.forEach((element) {
         element.reference.collection('posts').doc(postID).collection('comments').doc(userData!.userID).set(model.toJson()).then((value){
         });
-        emit(AddCommentSuccessState());
       });
     });
+    emit(AddCommentSuccessState());
   }
 
   List<CommentDataModel> comments = [];
@@ -351,14 +394,14 @@ class LayoutCubit extends Cubit<LayoutStates>{
            val.docs.forEach((element) {
              messages.add(MessageDataModel.fromJson(json: element.data()));
            });
-           // الفكره هنا ان كل اما يجيب مسدج بعمل refresh لل UI ف عشان كده ظهرت ع طول وده لازم اعملها في صفحه home screen
+           // مهم جدا .....الفكره هنا ان كل اما يجيب مسدج بعمل refresh لل UI ف عشان كده ظهرت ع طول وده لازم اعملها في صفحه home screen
            emit(GetMessageSuccessState());
          });
   }
 
   // ***************************************************************************
   /*
-    10) delete a person from App completely (( optional ))
+    10) delete a person from App completely (( optional for me ))
   */
   void deleteUser({required String personID}){
     FirebaseFirestore.instance.collection('users').doc(personID).delete().then((value){
@@ -369,15 +412,15 @@ class LayoutCubit extends Cubit<LayoutStates>{
   // related to search screen (( search for user by his userName ))
   List<UserDataModel> searchData = [];
   void searchForUser({required String input}){
+    searchData = [];
     emit(SearchForUserLoadingState());
     // arrayContain will get all userName that contain input which user will type on textFormField
-    FirebaseFirestore.instance.collection('users').where('userName',arrayContains: input).get().then((value){
-      for (var element in value.docs) 
-      { 
+    FirebaseFirestore.instance.collection('users').where('userName',whereIn: [input]).get().then((value){
+      value.docs.forEach((element) {
         searchData.add(UserDataModel.fromJson(element.data()));
-      }
-      emit(SearchForUserSuccessState());
-    }).catchError((error){emit(SearchForUserErrorState());});
+        emit(SearchForUserSuccessState());
+      });
+    });
   }
 
 }

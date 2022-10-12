@@ -137,7 +137,7 @@ class RegisterScreen extends StatelessWidget {
                         const SizedBox(height: 20,),
                         defaultButton(
                             contentWidget: state is CreateUserLoadingState || state is SaveUserDataLoadingState || state is CreateUserSuccessState ?
-                                const Center(child: CircularProgressIndicator(color: whiteColor),) :
+                                const CupertinoActivityIndicator(color: whiteColor) :
                                 const Text("Sign Up",style: TextStyle(color: whiteColor),),
                             minWidth: double.infinity,
                             onTap: ()

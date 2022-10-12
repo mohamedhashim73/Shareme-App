@@ -1,5 +1,12 @@
 import 'package:flutter/material.dart';
+import '../../layouts/commentsViewScreen/commentsViewScreen.dart';
+import '../../layouts/layoutCubit/layoutCubit.dart';
+import '../../layouts/layoutCubit/layoutStates.dart';
+import '../../layouts/likesViewScreen/likesViewScreen.dart';
 import '../../models/commentModel.dart';
+import '../../models/post_Data_Model.dart';
+import '../../modules/edit_post/edit_post_screen.dart';
+import '../../modules/profile/profileScreen.dart';
 import '../styles/colors.dart';
 
 Widget buildDividerItem(){
@@ -114,3 +121,4 @@ Widget buildCommentItem({required CommentDataModel model,required BuildContext c
     }, separatorBuilder: (BuildContext context, int index) => const SizedBox(height: 5),
   );
 }
+

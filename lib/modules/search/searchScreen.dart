@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:social_app/layouts/layoutCubit/layoutCubit.dart';
@@ -15,52 +16,64 @@ class SearchScreen extends StatelessWidget {
         builder: (context,state){
           final cubit = LayoutCubit.getCubit(context);
           return Scaffold(
-            appBar: AppBar(toolbarHeight: 25,),
+            appBar: AppBar(toolbarHeight: 25,leading: const SizedBox(width: 0,),leadingWidth: 0),
             body: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 15.0),
               child: Column(
                 children:
                 [
-                  const SizedBox(height: 15,),
-                  TextFormField(
-                    controller: searchController,
-                    validator: (val)
-                    {
-                      return searchController.text.isEmpty ? "search must not be empty" : null;
-                    },
-                    onChanged: (input)
-                    {
-                      // cubit.searchForUser(input: input);
-                    },
-                    style: const TextStyle(fontSize: 20,fontWeight: FontWeight.w500,decoration: TextDecoration.none),
-                    decoration: InputDecoration(
-                      hintText: "search for user by his Name",
-                      hintStyle: Theme.of(context).textTheme.caption!.copyWith(fontSize: 15),
-                      prefixIcon: const Icon(Icons.search),
-                      suffix: GestureDetector(
-                        child: const Icon(Icons.close),
-                        onTap: ()
-                        {
-                          searchController.text = '';
-                        },
+                  // const SizedBox(height: 15,),
+                  Container(
+                    height: 60,
+                    child: TextFormField(
+                      controller: searchController,
+                      validator: (val)
+                      {
+                        return searchController.text.isEmpty ? "search must not be empty" : null;
+                      },
+                      onChanged: (input)
+                      {
+                        print(input);
+                        cubit.searchForUser(input: input);
+                      },
+                      style: const TextStyle(fontSize: 15,fontWeight: FontWeight.w300,decoration: TextDecoration.none),
+                      decoration: InputDecoration(
+                        hintText: "search for user by his Name",
+                        hintStyle: Theme.of(context).textTheme.caption!.copyWith(fontSize: 15),
+                        prefixIcon: const Icon(Icons.search),
+                        suffix: GestureDetector(
+                          child: const Icon(Icons.close),
+                          onTap: ()
+                          {
+                            searchController.text = '';
+                          },
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(50),
+                        )
                       ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(50),
-                      )
                     ),
                   ),
-                  const SizedBox(height: 15,),
+                  const SizedBox(height: 5,),
                   Expanded(
                     child: cubit.searchData.isNotEmpty ?
                         ListView.builder(
                         shrinkWrap: true,
                         physics: const BouncingScrollPhysics(),
-                        itemCount: 10,   // type cubit.searchData.length
+                        itemCount: cubit.searchData.length,   // type cubit.searchData.length
                         itemBuilder: (context,index){
-                          return buildUserItemShown();
+                          return GestureDetector(
+                              onTap: ()
+                              {
+                                // here after click will go to his profile page
+                              },
+                              child: buildUserItemShown(model: cubit.searchData[index])
+                          );
                         },
                       ) :
-                        const Center(child: Text("There is no users to shown",style: TextStyle(fontWeight: FontWeight.w500,fontSize: 16),),)
+                        state is SearchForUserLoadingState ?
+                          const CupertinoActivityIndicator() :
+                          const Center(child: Text("There is no users to shown",style: TextStyle(fontWeight: FontWeight.w500,fontSize: 16),),)
                   )
                 ],
               ),
@@ -71,12 +84,12 @@ class SearchScreen extends StatelessWidget {
   }
 
   // build the item that user will be shown in this screen => after click on the user, will go to his profile
-  Widget buildUserItemShown({UserDataModel? model}){
-    return const ListTile(
-      contentPadding: EdgeInsets.all(0),
-      leading: CircleAvatar(radius: 25,),     // model.image!
-      title: Text("Mohamed Hashim Rezk"),    // model.userName!
-      subtitle: Text("Software Engineer"),   // model.bio!
+  Widget buildUserItemShown({required UserDataModel model}){
+    return ListTile(
+      contentPadding: const EdgeInsets.all(0),
+      leading: CircleAvatar(radius: 25,backgroundImage: NetworkImage(model.image!)),     // model.image!
+      title: Text(model.userName!),    // model.userName!
+      subtitle: Text(model.bio!),   // model.bio!
     );
   }
 }

@@ -33,7 +33,8 @@ class CacheHelper{
     return sharedPreferences?.get(key) ;
   }
 
-  static dynamic deleteCacheData({required String key}){
-    return sharedPreferences?.remove(key) ;
+  static Future<bool> deleteCacheData({required String key}) async{
+    await sharedPreferences?.remove(key);
+    return true;
   }
 }

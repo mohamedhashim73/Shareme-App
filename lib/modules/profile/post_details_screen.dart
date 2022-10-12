@@ -13,26 +13,27 @@ import '../../layouts/likesViewScreen/likesViewScreen.dart';
 import '../../shared/components/components.dart';
 import '../edit_post/edit_post_screen.dart';
 
+// خلي بالك في حاجه لازم اعدلها بخصوص ظهور عدد الكومنتات اما افتح بوست بتاعي عشن عدلت علي صفحه الكومنتات واستعملت حاجه تانيه بدل setState
 class PostDetailsScreen extends StatelessWidget{
   // هنا محتاج اجيب postsID بس للبوستات بتاعتي عشان ابعت ID اما استدعي state ده عشان لو عاوز اعمل update or delete for post
   // هستدعيها اما اشغط علي صوره البوست في صفحه البروفايل بتاعي
   String postID;  // as it not saved with post data on fireStore so i will get when i call this state from PostsID that use in usersPostsData
   PostDataModel model;  // to get post data to be able to update it throw its id and the maker of it
+  int commentsNumber ;
+
+  PostDetailsScreen({super.key,required this.model,required this.postID,required this.commentsNumber});
+
   final captionController = TextEditingController();
-  PostDetailsScreen({super.key,required this.model,required this.postID});
+
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<LayoutCubit,LayoutStates>(
         listener: (context,state)
         {
-          /*
-          if( state is UpdatePostSuccessfullyState )
-          {
-            showDefaultSnackBar(message: "Post Updated successfully!", context: context, color: Colors.grey);
-            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>ProfileScreen(leadingIconExist: true,)));
-            LayoutCubit.getCubit(context).postImageFile = null ;
-          }
-           */
+          if( state is AddCommentSuccessState )
+            {
+              commentsNumber = commentsNumber + 1 ;
+            }
         },
         builder: (context,state){
           final cubit = LayoutCubit.getCubit(context);
@@ -41,58 +42,24 @@ class PostDetailsScreen extends StatelessWidget{
             appBar: AppBar(
               title: const Text("Post"),titleSpacing: 0,
               leading: defaultTextButton(title: const Icon(Icons.arrow_back_ios), onTap: (){Navigator.pop(context);}),
-              actions:
-              [
-                Padding(
-                  padding: const EdgeInsets.only(right: 12.0),
-                  child: state is UpdatePostLoadingState ?
-                  const CupertinoActivityIndicator(color: mainColor) :
-                  InkWell(
-                    child: const Icon(Icons.more_vert,color: mainColor,size: 25,),
-                    onTap: ()
-                    {
-                      showMenu(
-                          context: context,
-                          elevation: 1,
-                          position: const RelativeRect.fromLTRB(25.0, 25.0, 0.0, 0.0),
-                          items:
-                          [
-                            PopupMenuItem(
-                              onTap: (){
-                                Navigator.push(context, MaterialPageRoute(builder: (context)=>EditPostScreen(model: model,postID: postID)));
-                              },
-                              child: const Text('update post'),
-                            ),
-                            PopupMenuItem(
-                              onTap: (){
-                                cubit.deletePost(postMakerID: cubit.userData!.userID!, postID: postID);
-                              },
-                              child: const Text('delete post'),
-                            ),
-                          ]
-                      );
-                    },
-                  ),
-                )
-              ],
             ),
             body: model.userID == null ?
             const Center(child: CircularProgressIndicator(color: mainColor,),) :
             SingleChildScrollView(
               physics: const BouncingScrollPhysics(),
-              child: buildPostItem(context: context,model: model),
+              child: buildPostItem(context: context,model: model,state: state,cubit: cubit),
             )
           );
         }
     );
   }
 
-  Widget buildPostItem({required BuildContext context,required PostDataModel model}){
+  Widget buildPostItem({required BuildContext context,required PostDataModel model,required LayoutStates state ,required LayoutCubit cubit}){
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.only(left: 10,right: 5,top: 10),
+          padding: const EdgeInsets.only(left: 10,right: 5,top: 5),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
@@ -104,19 +71,49 @@ class PostDetailsScreen extends StatelessWidget{
                       shape: BoxShape.circle,
                       border: Border.all(color: Colors.grey.withOpacity(0.5))
                   ),
-                  child : model.userImage != null ? Image.network(model.userImage!,fit: BoxFit.cover,) : const Text("")
+                  child : model.userImage != null ? Image.network(cubit.userData!.image.toString(),fit: BoxFit.cover,) : const Text("")
               ),
               const SizedBox(width: 15,),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(model.userName!,style: const TextStyle(fontSize: 16),),
+                  Text(cubit.userData!.userName.toString(),style: const TextStyle(fontSize: 16),),
                   const SizedBox(height: 2,),
-                  Text(model.postDate!,style: Theme.of(context).textTheme.caption,),
+                  Text(model.postDate.toString(),style: Theme.of(context).textTheme.caption,),
                 ],
               ),
               const Spacer(),
-              GestureDetector(child: Icon(Icons.more_vert,color: blackColor.withOpacity(0.5),size: 25,),onTap: (){},),
+              GestureDetector(
+                  child: Icon(Icons.more_vert,color: blackColor.withOpacity(0.5),size: 25,),
+                  onTap: ()
+                  {
+                    showMenu(
+                        context: context,
+                        elevation: 1,
+                        position: const RelativeRect.fromLTRB(25.0, 25.0, 0.0, 0.0),
+                        items:
+                        [
+                          PopupMenuItem(
+                              onTap: () {},
+                              child: GestureDetector(
+                                child: const Text('update post'),
+                                onTap: ()
+                                {
+                                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>EditPostScreen(model: model,postID: postID,)));
+                                },
+                              )
+                          ),
+                          PopupMenuItem(
+                            onTap: ()
+                            {
+                              cubit.deletePost(postMakerID: model.userID!, postID: postID);
+                            },
+                            child: const Text('delete post'),
+                          ),
+                        ]
+                    );
+                  },
+              ),
             ],
           ),
         ),
@@ -139,30 +136,18 @@ class PostDetailsScreen extends StatelessWidget{
         const SizedBox(height: 12.5,),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12.0),
-          child: Row(
-            children: [
-              Expanded(
-                child: InkWell(
-                    onTap: ()
-                    {
-                      Navigator.push(context, MaterialPageRoute(builder: (context){return LikesViewScreen(postID: postID, postMakerID: model.userID!);}));
-                    },
-                    child: Text("0 likes",style: Theme.of(context).textTheme.caption,)),
-                // Text("${cubit.likesNumber[index]} likes",style: Theme.of(context).textTheme.caption,)),
-              ),
-              Expanded(
-                child: InkWell(
-                    onTap: ()
-                    {
-                      Navigator.push(context, MaterialPageRoute(builder: (context){return CommentsScreen(postID: postID, postMakerID: model.userID!,);}));
-                    },
-                    child: Align(
-                        alignment:AlignmentDirectional.topEnd,
-                        // هنا محتاج اجيب عدد الكومنتات بالبوست بتاعي بمعني اصح في صفحه البروفايل وانا بعمل get myPosts
-                        child: Text("${0} comments",
-                          style: Theme.of(context).textTheme.caption,))),
-              )
-            ],
+          child: Align(
+            alignment: AlignmentDirectional.topStart,
+            child: InkWell(
+              onTap: ()
+              {
+                Navigator.push(context, MaterialPageRoute(builder: (context){return CommentsScreen(postID: postID, postMakerID: model.userID!);}));
+              },
+              child: commentsNumber != null ?
+                  // عملت حوار add comment success عشان اما يضيف كومنت يحصل ريفرش لل UI بحيث يظهر انه زاد واحد
+              Text("$commentsNumber comments",style: Theme.of(context).textTheme.caption,) :
+              Text("0 comments",style: Theme.of(context).textTheme.caption,),
+            ),
           ),
         ),
         buildDividerItem(),
@@ -234,7 +219,7 @@ class PostDetailsScreen extends StatelessWidget{
                         child: InkWell(
                           onTap: ()
                           {
-                            Navigator.push(context, MaterialPageRoute(builder: (context){return CommentsScreen(postID: postID, postMakerID: model.userID!,);}));
+                            Navigator.push(context, MaterialPageRoute(builder: (context){return CommentsScreen(postID: postID, postMakerID: model.userID!);}));
                           },
                           child: Container(
                             padding: const EdgeInsets.all(10),

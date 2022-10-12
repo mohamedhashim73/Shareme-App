@@ -1,21 +1,29 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:social_app/layouts/layoutCubit/layoutCubit.dart';
 import 'package:social_app/layouts/layoutCubit/layoutStates.dart';
 import 'package:social_app/models/post_Data_Model.dart';
 import 'package:social_app/modules/profile/post_details_screen.dart';
+import 'package:social_app/modules/sign_screens/signScreens/login.dart';
 import 'package:social_app/shared/components/components.dart';
+import 'package:social_app/shared/network/local/cacheHelper.dart';
 import 'package:social_app/shared/styles/colors.dart';
 
+import '../../layouts/commentsViewScreen/commentsViewScreen.dart';
+import '../../layouts/likesViewScreen/likesViewScreen.dart';
+import '../edit_post/edit_post_screen.dart';
+
 class ProfileScreen extends StatelessWidget {
-  bool? leadingIconExist = false;  // made this to make a leading icon available only if I open this screen after adding a post
-  ProfileScreen({super.key, this.leadingIconExist});
+  ProfileScreen({super.key});
   Widget build(BuildContext context) {
     return Builder(
       builder: (context){
         LayoutCubit.getCubit(context)..getMyData()..getMyPosts();
         return BlocConsumer<LayoutCubit,LayoutStates>(
-            listener: (context,state){},
+            listener: (context,state){
+              if( state is AddLikeSuccessfullyState || state is RemoveLikeSuccessfullyState ) LayoutCubit.getCubit(context).getMyPosts();
+            },
             builder: (context,state){
               final cubit = LayoutCubit.getCubit(context);
               return cubit.userData == null ?
@@ -35,116 +43,138 @@ class ProfileScreen extends StatelessWidget {
                           onTap: ()
                           {
                             // here should show bottomNavigationBar contain userName or login with another account
+                            final snackBar = SnackBar(
+                              shape: const RoundedRectangleBorder(borderRadius: BorderRadius.only(topRight: Radius.circular(15),topLeft: Radius.circular(15))),
+                              elevation: 0,
+                              // width: double.infinity,
+                              // action: SnackBarAction(label: "Cancel",onPressed: (){},),
+                              content: SizedBox(
+                                height: 100,
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children:
+                                  [
+                                    Row(
+                                      children:
+                                      [
+                                        Text(cubit.userData!.userName.toString(),style: const TextStyle(fontWeight: FontWeight.w500,fontSize: 16),textAlign: TextAlign.center,),
+                                        const Spacer(),
+                                        Radio(value: true, groupValue: "groupValue", onChanged: (val){},activeColor: mainColor,hoverColor: mainColor,focusColor: mainColor),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 20,),
+                                    defaultTextButton(
+                                        title: const Text("login with another account !",style: TextStyle(fontWeight: FontWeight.w500,fontSize: 16),textAlign: TextAlign.center,),
+                                        onTap: ()
+                                        {
+                                          // delete userID that saved on Cache and go to Sign in
+                                          CacheHelper.deleteCacheData(key: 'uid').then((value){
+                                            if( value == true )
+                                              {
+                                                Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>LoginScreen()));
+                                              }
+                                          });
+                                        }
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              clipBehavior: Clip.hardEdge,
+                              padding: const EdgeInsets.all(15),
+                              backgroundColor: Colors.black26.withOpacity(0.8),
+                              duration: const Duration(seconds: 1),);
+                            ScaffoldMessenger.of(context).showSnackBar(snackBar);
                           }
                       ),
                     ),
-                    body: SingleChildScrollView(
-                      physics: const BouncingScrollPhysics(),
-                      child: Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.symmetric(horizontal: 12.0,vertical: 5),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children:
-                          [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: [
-                                Expanded(
-                                  child: Container(
-                                    height:70,
-                                    width: 70,
-                                    clipBehavior: Clip.hardEdge,
-                                    decoration: BoxDecoration(shape: BoxShape.circle,border: Border.all(color: blackColor.withOpacity(0.5))),
-                                    child: Image(image: NetworkImage(cubit.userData!.image.toString()),fit: BoxFit.cover,),),
-                                ),
-                                Expanded(child: defaultUserInfo(title: 'Posts', number: '${cubit.userPostsData.length}', onTap: () {  }),),
-                                Expanded(child: defaultUserInfo(title: 'Followers', number: '0', onTap: () {  })),
-                                Expanded(child: defaultUserInfo(title: 'Following', number: '0', onTap: () {  }),)
-                              ],
-                            ),
-                            const SizedBox(height: 10,),
-                            Text(cubit.userData!.userName.toString(),style: Theme.of(context).textTheme.bodyLarge!.copyWith(fontSize: 16),),
-                            const SizedBox(height: 2.5),
-                            defaultTextButton(title: Text(cubit.userData!.bio!,overflow: TextOverflow.ellipsis,maxLines: 3,style: Theme.of(context).textTheme.caption!.copyWith(fontSize: 14)), onTap: (){}),
-                            const SizedBox(height:5,),
-                            Row(
-                              children: [
-                                Expanded(
-                                    child: OutlinedButton(
-                                        onPressed: ()
-                                        {
-                                          Navigator.pushNamed(context, 'editProfileScreen');
-                                        },
-                                        child: const Text("Edit profile",style:TextStyle(fontSize: 16.5)))),
-                                const SizedBox(width: 5,),
-                                OutlinedButton(onPressed: (){}, child: const Icon(Icons.edit,size: 19,)),
-                              ],
-                            ),
-                            const SizedBox(height: 15),
-                            // Related to Archived Story in Profile
-                            Row(
+                    body: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children:
+                      [
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
                                 children: [
-                                  ...buildArchivedStory(context: context), // as it is a list of Container
-                                  InkWell(
-                                    onTap:(){},
-                                    child: Column(
-                                      children: [
-                                        const CircleAvatar(backgroundColor:blackColor,minRadius:30,child: Icon(Icons.add,color: whiteColor,),),
-                                        const SizedBox(height: 10,),
-                                        Text("add story",style: Theme.of(context).textTheme.bodyLarge!.copyWith(fontSize: 13),),
-                                      ],
-                                    ),
+                                  Expanded(
+                                    child: Container(
+                                      height:70,
+                                      width: 70,
+                                      clipBehavior: Clip.hardEdge,
+                                      decoration: BoxDecoration(shape: BoxShape.circle,border: Border.all(color: blackColor.withOpacity(0.5))),
+                                      child: Image(image: NetworkImage(cubit.userData!.image.toString()),fit: BoxFit.cover,),),
                                   ),
-                                ]
-                            ),
-                            const SizedBox(height: 15,),
-                            // Divide rest page for Images & Videos to show
-                            Row(
-                              children: [
-                                buildShowSelectedItems(cubit: cubit, iconShown: Icons.image, isImage: true,onTap: (){}),
-                                buildShowSelectedItems(cubit: cubit, iconShown: Icons.video_settings, isImage: false,onTap: (){}),
-                              ],
-                            ),
-                            cubit.profileImageChosen?
-                            // Put All Images for User :
-                            GridView.builder(
-                                itemCount: cubit.userPostsData.length,
-                                physics: const NeverScrollableScrollPhysics(),
-                                shrinkWrap: true,
-                                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3,childAspectRatio: 0.8,mainAxisSpacing: 3,crossAxisSpacing: 3),
-                                itemBuilder: (context,i){
-                                  return GestureDetector(
-                                      onTap: (){
-                                        Navigator.push(context, MaterialPageRoute(builder: (context)
-                                        {
-                                          return PostDetailsScreen(model: cubit.userPostsData[i],postID: cubit.myPostsID[i],);
-                                        }));
-                                      },
-                                      child: buildPostsImagesShown(model: cubit.userPostsData[i],context: context));
-                                }
-                            ) :
-                            // Put All Videos for User
-                            GridView.builder(
-                                itemCount: cubit.userPostsData.length,
-                                physics: const NeverScrollableScrollPhysics(),
-                                shrinkWrap: true,
-                                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3,childAspectRatio: 0.8,mainAxisSpacing: 3,crossAxisSpacing: 3),
-                                itemBuilder: (context,i){
-                                  return GestureDetector(
-                                    onTap: (){
-                                      Navigator.push(context, MaterialPageRoute(builder: (context)
-                                      {
-                                        return PostDetailsScreen(model: cubit.userPostsData[i],postID: cubit.myPostsID[i],);
-                                      }));
-                                    },
-                                      child: buildPostsImagesShown(model: cubit.userPostsData[i],context: context));
-                                }
-                            )
-                          ],
+                                  Expanded(child: defaultUserInfo(title: 'Posts', number: '${cubit.userPostsData.length}', onTap: () {  }),),
+                                  Expanded(child: defaultUserInfo(title: 'Followers', number: '0', onTap: () {  })),
+                                  Expanded(child: defaultUserInfo(title: 'Following', number: '0', onTap: () {  }),)
+                                ],
+                              ),
+                              const SizedBox(height: 10,),
+                              Text(cubit.userData!.userName.toString(),style: Theme.of(context).textTheme.bodyLarge!.copyWith(fontSize: 16),),
+                              const SizedBox(height: 2.5),
+                              defaultTextButton(title: Text(cubit.userData!.bio!,overflow: TextOverflow.ellipsis,maxLines: 3,style: Theme.of(context).textTheme.caption!.copyWith(fontSize: 14)), onTap: (){}),
+                              const SizedBox(height:5,),
+                              Row(
+                                children: [
+                                  Expanded(
+                                      child: OutlinedButton(
+                                          onPressed: ()
+                                          {
+                                            Navigator.pushNamed(context, 'editProfileScreen');
+                                          },
+                                          child: const Text("Edit profile",style:TextStyle(fontSize: 16.5)))),
+                                  const SizedBox(width: 5,),
+                                  OutlinedButton(onPressed: (){}, child: const Icon(Icons.edit,size: 19,)),
+                                ],
+                              ),
+                              const SizedBox(height: 15),
+                              // Related to Archived Story in Profile
+                              Row(
+                                  children: [
+                                    ...buildArchivedStory(context: context), // as it is a list of Container
+                                    InkWell(
+                                      onTap:(){},
+                                      child: Column(
+                                        children: [
+                                          const CircleAvatar(backgroundColor:blackColor,minRadius:30,child: Icon(Icons.add,color: whiteColor,),),
+                                          const SizedBox(height: 10,),
+                                          Text("add story",style: Theme.of(context).textTheme.bodyLarge!.copyWith(fontSize: 13),),
+                                        ],
+                                      ),
+                                    ),
+                                  ]
+                              ),
+                              const SizedBox(height: 15,),
+                              const Text("Posts",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 18),),
+                              const SizedBox(height: 10,),
+                            ],
+                          ),
                         ),
-                      ),
-                    )
+                        cubit.userData != null && cubit.likesPostsData != null ?
+                        Expanded(
+                          child: GridView.builder(
+                                    itemCount: cubit.userPostsData.length,
+                                    physics: const NeverScrollableScrollPhysics(),
+                                    shrinkWrap: true,
+                                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3,childAspectRatio: 0.8,mainAxisSpacing: 3,crossAxisSpacing: 3),
+                                    itemBuilder: (context,i){
+                                      return GestureDetector(
+                                          onTap: (){
+                                            Navigator.push(context, MaterialPageRoute(builder: (context)
+                                            {
+                                              return PostDetailsScreen(model: cubit.userPostsData[i],postID: cubit.myPostsID[i],commentsNumber: cubit.myCommentsNumber[i] ?? 0,);
+                                            }));
+                                          },
+                                          child: buildPostsImagesShown(model: cubit.userPostsData[i],context: context));
+                                    }))
+                            : const CupertinoActivityIndicator(),
+                      ],
+                    ),
                 );
             }
         );
@@ -183,23 +213,6 @@ class ProfileScreen extends StatelessWidget {
     });
   }
 
-  // for chosen show Images posts or Videos only
-  Widget buildShowSelectedItems({required LayoutCubit cubit,required IconData iconShown,required bool isImage,required Function() onTap}){
-    return Expanded(
-      child: InkWell(
-        onTap: onTap,
-        child: Column(
-          children: [
-            const Icon(Icons.image),
-            isImage ?
-            cubit.profileImageChosen ? const Divider(color: blackColor,thickness: 2,) : const Text("") :
-            !cubit.profileImageChosen ? const Divider(color: blackColor,thickness: 2,) : const Text(""),
-          ],
-        ),
-      ),
-    );
-  }
-
   Widget buildPostsImagesShown({required PostDataModel model,required BuildContext context}){
     return model.postImage != ''?
     Image.network(model.postImage!,fit: BoxFit.cover,) :
@@ -213,4 +226,5 @@ class ProfileScreen extends StatelessWidget {
     )
     ;
   }
+
 }
