@@ -29,12 +29,6 @@ class _HomeScreenState extends State<HomeScreen> {
             listener: (context,state)
             {
               // ده انا عاملها عشان اشوف كده هل هيتم حل مشكله لو عملت لايك ع بوست وجت اعمل بوست جديد بيحصل تكرار للبوست اللي عملت له لايك
-              /*
-              if( state is UploadPostWithoutImageSuccessState )
-               {
-                 setState((){});
-               }
-               */
             },
             builder: (context,state){
               final cubit = LayoutCubit.getCubit(context);

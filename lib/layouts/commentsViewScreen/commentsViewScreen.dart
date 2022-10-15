@@ -64,7 +64,6 @@ class CommentsScreen extends StatelessWidget {
                                       onFieldSubmitted: (val)
                                       {
                                         // postIndex will get it when i call this screen from homeScreen to use it to increase the number by one after add a comments
-                                        // cubit.addComment(comment: val,postID:postID);
                                         cubit.addComment(comment: val,postID:postID);
                                         setState((){
                                           commentController.text = '';

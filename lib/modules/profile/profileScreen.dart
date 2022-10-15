@@ -6,16 +6,21 @@ import 'package:social_app/layouts/layoutCubit/layoutStates.dart';
 import 'package:social_app/models/post_Data_Model.dart';
 import 'package:social_app/modules/profile/post_details_screen.dart';
 import 'package:social_app/modules/sign_screens/signScreens/login.dart';
+import 'package:social_app/modules/storyItem/storyShownScreen.dart';
 import 'package:social_app/shared/components/components.dart';
+import 'package:social_app/shared/components/constants.dart';
 import 'package:social_app/shared/network/local/cacheHelper.dart';
 import 'package:social_app/shared/styles/colors.dart';
+
+import '../../models/storyModel.dart';
+import '../storyItem/createStory.dart';
 
 class ProfileScreen extends StatelessWidget {
   ProfileScreen({super.key});
   Widget build(BuildContext context) {
     return Builder(
       builder: (context){
-        LayoutCubit.getCubit(context)..getMyData()..getMyPosts();
+        LayoutCubit.getCubit(context)..getMyData()..getStories(userID)..getMyPosts();
         return BlocConsumer<LayoutCubit,LayoutStates>(
             listener: (context,state)
             {
@@ -23,7 +28,7 @@ class ProfileScreen extends StatelessWidget {
             },
             builder: (context,state){
               final cubit = LayoutCubit.getCubit(context);
-              return cubit.userData == null ?
+              return cubit.userData == null || cubit.stories == null ?
                 const Center(child:  CircularProgressIndicator(color: mainColor,)) :
                 Scaffold(
                     appBar: AppBar(
@@ -133,20 +138,46 @@ class ProfileScreen extends StatelessWidget {
                               ),
                               const SizedBox(height: 15),
                               // Related to Archived Story in Profile
-                              Row(
-                                  children: [
-                                    ...buildArchivedStory(context: context), // as it is a list of Container
-                                    InkWell(
-                                      onTap:(){},
-                                      child: Column(
-                                        children: [
-                                          const CircleAvatar(backgroundColor:blackColor,minRadius:30,child: Icon(Icons.add,color: whiteColor,),),
-                                          const SizedBox(height: 10,),
-                                          Text("add story",style: Theme.of(context).textTheme.bodyLarge!.copyWith(fontSize: 13),),
-                                        ],
-                                      ),
-                                    ),
-                                  ]
+                              SizedBox(
+                                height: 90,
+                                width: double.infinity,
+                                child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                       if( cubit.stories.isNotEmpty )
+                                          Expanded(
+                                            child: GridView.builder(
+                                              itemCount: cubit.stories.length,
+                                              scrollDirection: Axis.horizontal,
+                                              // shrinkWrap: true,
+                                              physics: const BouncingScrollPhysics(),
+                                              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount:1,mainAxisSpacing: 0,childAspectRatio: 1.1),
+                                              itemBuilder: (context,i){
+                                                return buildArchivedStory(context: context, model: cubit.stories[i]);
+                                              },
+                                            ),
+                                          ),
+                                      InkWell(
+                                          onTap:(){
+                                            Navigator.push(context, MaterialPageRoute(builder: (context)=>CreateStoryScreen()));
+                                          },
+                                          child: Column(
+                                            children: [
+                                              Container(
+                                                height: 65,
+                                                width: 65,
+                                                alignment: Alignment.center,
+                                                clipBehavior: Clip.hardEdge,
+                                                decoration: BoxDecoration(shape: BoxShape.circle,border: Border.all(color: blackColor.withOpacity(0.5))),
+                                                child: const Icon(Icons.add)),
+                                              const SizedBox(height: 10,),
+                                              Text("add story",style: Theme.of(context).textTheme.bodyLarge!.copyWith(fontSize: 12),),
+                                            ],
+                                          ),
+                                        ),
+                                      ]
+                                  ),
                               ),
                               const SizedBox(height: 15,),
                               const Text("Posts",style: TextStyle(fontWeight: FontWeight.bold,fontSize: 18),),
@@ -197,22 +228,29 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  List<Container> buildArchivedStory({required BuildContext context}){
-    return List.generate(3, (index){
-      return Container(
-        margin: const EdgeInsets.only(right: 12.5),
-        child: InkWell(
-          onTap:(){},
-          child: Column(
-            children: [
-              CircleAvatar(minRadius:30,backgroundColor: Colors.green.withOpacity(0.5),),
-              const SizedBox(height: 10,),
-              Text("FCI Tanta",style: Theme.of(context).textTheme.bodyLarge!.copyWith(fontSize: 13),),
-            ],
-          ),
+  Widget buildArchivedStory({required BuildContext context,required StoryDataModel model}){
+    return Container(
+      margin: const EdgeInsets.only(right: 12.5),
+      child: InkWell(
+        onTap:()
+        {
+          // open the story in separated screen (( لو هعمل بروفايل لشخص تاني هبقي اباصي المودل تبعه ))
+          Navigator.push(context, MaterialPageRoute(builder: (context)=>StoryShownScreen(storyModel: model, userModel: LayoutCubit.getCubit(context).userData!)));
+        },
+        child: Column(
+          children: [
+            Container(
+              height: 65,
+              width: 65,
+              clipBehavior: Clip.hardEdge,
+              decoration: BoxDecoration(shape: BoxShape.circle,border: Border.all(color: blackColor.withOpacity(0.5))),
+              child: Image(image: NetworkImage(model.storyImage.toString()),fit: BoxFit.cover,),),
+            const SizedBox(height: 10,),
+            Text(model.storyTitle.toString(),style: Theme.of(context).textTheme.bodyLarge!.copyWith(fontSize: 12),maxLines: 1,overflow: TextOverflow.ellipsis,),
+          ],
         ),
-      );
-    });
+      ),
+    );
   }
 
   Widget buildPostsImagesShown({required PostDataModel model,required BuildContext context}){

@@ -55,10 +55,12 @@ class MyApp extends StatelessWidget {
   }
 }
 
- // هحاول افضي list usersPostsData بعدين استدعي الداله تبع البوستات  =. لو حصلل اي ايرور ف نسخه شغاله زي الفل في data1 اسمها last version for shareme app
+ // ***** there is a simple error happen when i add a like on any post => this post duplicate ath this moment ده تعتبر المشكله الوحيده في التطبيق حاليا والنسخه ده مرفوعه علي github
 
- // there is a simple error happen when i add a like on any post => this post duplicate ath this moment
-
-// في مشكله اما بعمل بوست جديد واجي ادخل علي صفحه الهوم بيحصل تكرار
-
-// في مشكله اما بعمل حذف لبوست بيحصل تراكم في البوستات ممكن اما احذف بوست اعمل ريفرش او استدعي الداله م جدبد او اروح ع صفحه البروفايل ع طول
+ // المشكله دلوقتي بتحصل مع اللايك عموما سواء م البروفايل او حتي صفحه homeLayoutScreen
+ /*
+   1. البروفايل للاخرين
+   2. علاج نقطه اللايك
+   3. عمل متغير خاص بعدد اللايكات
+   4. الاستوري في صفحه البروفايل
+ */

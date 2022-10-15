@@ -137,3 +137,19 @@ class SearchForUserSuccessState extends LayoutStates{}
 
 class SearchForUserErrorState extends LayoutStates{}
 
+// related to archived story
+
+class StoryImageChosenSuccessState extends LayoutStates{}
+
+class StoryImageChosenErrorState extends LayoutStates{}
+
+class CreateStorySuccessState extends LayoutStates{}
+
+class CreateStoryLoadingState extends LayoutStates{}
+
+class CanceledImageForStoryState extends LayoutStates{}
+
+class GetArchivedStoriesLoadingState extends LayoutStates{}
+
+class GetArchivedStoriesSuccessState extends LayoutStates{}
+

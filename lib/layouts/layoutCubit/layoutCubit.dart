@@ -4,10 +4,12 @@ import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:jiffy/jiffy.dart';
 import 'package:social_app/models/commentModel.dart';
 import 'package:social_app/models/likeDataModel.dart';
 import 'package:social_app/models/messgaeDataModel.dart';
 import 'package:social_app/models/post_Data_Model.dart';
+import 'package:social_app/models/storyModel.dart';
 import 'package:social_app/models/user_data_model.dart';
 import 'package:social_app/modules/home/homeScreen.dart';
 import 'package:social_app/modules/profile/profileScreen.dart';
@@ -490,4 +492,64 @@ class LayoutCubit extends Cubit<LayoutStates>{
     });
   }
 
+  /*
+    11) add a story to archived stories || delete it
+   */
+
+   // method for adding a story
+  File? storyImage;
+  void getStoryImage() async {
+    final storyPicked = await ImagePicker().getImage(source: ImageSource.gallery);
+    if( storyPicked != null )
+      {
+        storyImage = File(storyPicked.path);
+        print("chosen story image successfully");
+        emit(StoryImageChosenSuccessState());
+      }
+    else
+      {
+        print("Error during get story Image for Archived stories");
+        emit(StoryImageChosenErrorState());
+      }
+  }
+
+  // method for create story on archived stories
+  void createStory({required String storyTitle}){
+    emit(CreateStoryLoadingState());
+    if( storyImage != null )
+    {
+      firebase_storage.FirebaseStorage.instance.ref()
+        .child("stories/${Uri.file(storyImage!.path).pathSegments.last}")
+        .putFile(storyImage!)
+        .then((val){
+          val.ref.getDownloadURL().then((storyUrl){
+            final model = StoryDataModel(userData!.userName, userData!.userID, storyUrl, storyTitle, Jiffy(DateTime.now().toString()).yMMMMd);
+            // upload story data on fireStore
+            FirebaseFirestore.instance.collection('users').doc(userData!.userID).collection('archivedStories').add(model.toJson()).then((value){
+              // save data on List<storyDataModel> to display it on profile screen
+              emit(CreateStorySuccessState());
+            });
+          });
+    });
+    }
+  }
+
+  void canceledImageForStory(){
+    storyImage = null;
+    emit(CanceledImageForPostState());
+  }
+
+  // method for get stories for user by his ID
+  List<StoryDataModel> stories = [];
+  void getStories(String? storiesMakerID){
+    stories = [];
+    emit(GetArchivedStoriesLoadingState());
+    FirebaseFirestore.instance.collection('users').doc(storiesMakerID??userData!.userID).collection('archivedStories').get().then((value){
+      value.docs.forEach((element) {
+        stories.add(StoryDataModel.fromJson(json: element.data()));
+        emit(GetArchivedStoriesSuccessState());
+      });
+      emit(GetArchivedStoriesSuccessState());
+    });
+  }
 }
