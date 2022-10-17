@@ -88,18 +88,21 @@ class LoginScreen extends StatelessWidget {
                         const SizedBox(height: 10,),
                         defaultButton(
                             contentWidget: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: const [
-                                CircleAvatar(
-                                  maxRadius: 10,
-                                  backgroundImage: (AssetImage("images/google.png")),
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: const [
+                                    CircleAvatar(
+                                      maxRadius: 10,
+                                      backgroundImage: (AssetImage("images/google.png")),
+                                    ),
+                                    SizedBox(width: 10,),
+                                    Text("Sign In with Google",style: TextStyle(color: whiteColor),),
+                                  ],
                                 ),
-                                SizedBox(width: 10,),
-                                Text("Sign In with Google",style: TextStyle(color: whiteColor),),
-                              ],
-                            ),
                             minWidth: double.infinity,
-                            onTap: (){print("Tapped!");},
+                            onTap: () async
+                            {
+                              await cubit.signInWithGoogle();
+                            },
                             padding: const EdgeInsets.all(10),
                             roundedRectangleBorder: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25.0))
                         ),

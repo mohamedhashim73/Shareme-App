@@ -35,7 +35,7 @@ class StoryShownScreen extends StatelessWidget {
         // mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Padding(
-            padding: const EdgeInsets.only(left: 10,right: 5,top: 10),
+            padding: const EdgeInsets.only(left: 10,right: 5),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -67,7 +67,7 @@ class StoryShownScreen extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 10,),
+          const SizedBox(height: 30,),
           Expanded(
             child: Center(child: Image.network(model.storyImage.toString())),
           ),

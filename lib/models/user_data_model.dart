@@ -4,7 +4,8 @@ class UserDataModel{
   String? image;
   String? email;
   String? userID;
-  UserDataModel({this.email,this.userID,this.userName,this.image,this.bio});
+  String? websiteUrl;
+  UserDataModel({this.email,this.userID,this.userName,this.image,this.bio,this.websiteUrl});
   // NamedConstructor => I will used it when i get Data from fireStore and save it on this model
   UserDataModel.fromJson(Map<String,dynamic> json){
     userName = json['userName'];
@@ -12,6 +13,7 @@ class UserDataModel{
     image = json['image'];
     email = json['email'];
     userID = json['uid'];
+    websiteUrl = json['websiteUrl'];
   }
   // TOJson  => I will used it when i want to  send data to cloud firestore ( Fields )
   Map<String,dynamic> toJson(){
@@ -21,6 +23,7 @@ class UserDataModel{
       'image' : image,
       'email' : email,
       'uid' : userID,
+      'websiteUrl' : websiteUrl,
     };
   }
 }

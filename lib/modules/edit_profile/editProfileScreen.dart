@@ -10,6 +10,7 @@ class EditProfileScreen extends StatelessWidget {
   final emailController = TextEditingController();
   final bioController = TextEditingController();
   final userNameController = TextEditingController();
+  final websiteUrlController = TextEditingController();
   final formKey = GlobalKey<FormState>();
 
   EditProfileScreen({super.key});
@@ -19,6 +20,7 @@ class EditProfileScreen extends StatelessWidget {
     emailController.text = cubit.userData!.email!;
     userNameController.text = cubit.userData!.userName!;
     bioController.text = cubit.userData!.bio!;
+    websiteUrlController.text = cubit.userData!.websiteUrl!;
     return Scaffold(
         appBar: AppBar(
           leading: InkWell(
@@ -52,11 +54,11 @@ class EditProfileScreen extends StatelessWidget {
                       {
                         if( cubit.userImageFile != null )
                         {
-                          cubit.updateUserDataWithImage(userName: userNameController.text,email: emailController.text,bio: bioController.text);
+                          cubit.updateUserDataWithImage(userName: userNameController.text,email: emailController.text,bio: bioController.text,websiteUrl: websiteUrlController.text);
                         }
                         else
                         {
-                          cubit.updateUserDataWithoutImage(userName: userNameController.text,email: emailController.text,bio: bioController.text);
+                          cubit.updateUserDataWithoutImage(userName: userNameController.text,email: emailController.text,bio: bioController.text,websiteUrl: websiteUrlController.text);
                         }
                       },
                       child: const Icon(Icons.done,color: Colors.black,),),
@@ -133,6 +135,17 @@ class EditProfileScreen extends StatelessWidget {
                           return bioController.text.isEmpty ? "bio must not be empty" : null ;
                         }
                     ),
+                    const SizedBox(height: 20,),
+                    specificTextFormField(
+                        label: "Website Url",
+                        inputType: TextInputType.url,
+                        hint: cubit.userData!.websiteUrl! == "" ? "add a link here for your website" : "",
+                        controller: websiteUrlController,
+                        validator: (val)
+                        {
+                          return websiteUrlController.text.isEmpty ? "websiteUrl must not be empty" : null ;
+                        }
+                    ),
                   ]
               ),
             ),
@@ -141,13 +154,14 @@ class EditProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget specificTextFormField({required String label,required TextEditingController controller,required TextInputType inputType,required dynamic validator}){
+  Widget specificTextFormField({required String label,required TextEditingController controller,required TextInputType inputType,required dynamic validator,String? hint}){
     return TextFormField(
       controller: controller,
       keyboardType: inputType,
       validator: validator,
       decoration: InputDecoration(
         labelText: label,
+        hintText: hint,
         contentPadding: const EdgeInsets.symmetric(horizontal: 10),
         border: const UnderlineInputBorder(),
       ),

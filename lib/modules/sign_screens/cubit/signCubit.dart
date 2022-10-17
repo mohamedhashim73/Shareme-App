@@ -8,6 +8,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:social_app/shared/network/local/cacheHelper.dart';
 import 'dart:io';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class SignCubit extends Cubit<SignStates>{
   SignCubit() : super(InitialSignState());
@@ -54,7 +55,7 @@ class SignCubit extends Cubit<SignStates>{
     .then((val){
       val.ref.getDownloadURL().then((imageUrl){
         print(imageUrl);
-        UserDataModel model = UserDataModel(userName:userName,email: email,userID: uid,image: imageUrl,bio: bio);
+        UserDataModel model = UserDataModel(userName:userName,email: email,userID: uid,image: imageUrl,bio: bio,websiteUrl: "");
         FirebaseFirestore.instance.collection('users').doc(uid).set(model.toJson()).then((value){
           emit(SaveUserDataSuccessState());
         });
@@ -71,4 +72,19 @@ class SignCubit extends Cubit<SignStates>{
     }).catchError((onError)=>emit(UserLoginErrorState(onError.toString())));
   }
 
+  Future<void> signInWithGoogle() async {
+    GoogleSignInAccount? googleSignInAccount = await GoogleSignIn().signIn();
+    GoogleSignInAuthentication googleSignInAuthentication = await googleSignInAccount!.authentication;
+    OAuthCredential credential = GoogleAuthProvider.credential(
+      accessToken: googleSignInAuthentication.accessToken,
+      idToken: googleSignInAuthentication.idToken,
+    );
+    // userCredential mean data for user that i sign in with it
+    UserCredential user = await FirebaseAuth.instance.signInWithCredential(credential);
+    CacheHelper.saveCacheData(key: 'uid', val: user.user!.uid);    // to save User ID on Cache to go to home directly second time
+    UserDataModel model = UserDataModel(userName:user.user!.displayName,email: user.user!.email,userID: user.user!.uid,image: user.user!.photoURL,bio: "type your bio here",websiteUrl: "");
+    FirebaseFirestore.instance.collection('users').doc(user.user!.uid).set(model.toJson()).then((value){
+      emit(UserLoginSuccessState());
+    });
+  }
 }

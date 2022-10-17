@@ -19,9 +19,7 @@ class CreatePostScreen extends StatelessWidget {
         {
           if( state is UploadPostWithoutImageSuccessState )
           {
-            showDefaultSnackBar(message: "Post Uploaded successfully!", context: context, color: Colors.grey);
-            // LayoutCubit.getCubit(context).getUsersPosts();
-            // Navigator.pop(context);    // عملت pop عشان ميحصلش تراكم ف البوستات اما ارجع لصفحه home
+            showDefaultSnackBar(message: "Post Uploaded successfully!", context: context, color: Colors.green);
             Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>ProfileScreen()));
             LayoutCubit.getCubit(context).postImageFile = null ;
           }

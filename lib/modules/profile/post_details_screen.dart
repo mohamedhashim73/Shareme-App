@@ -6,7 +6,6 @@ import 'package:social_app/modules/profile/profileScreen.dart';
 import 'package:social_app/shared/components/constants.dart';
 import 'package:social_app/shared/styles/colors.dart';
 import '../../layouts/commentsViewScreen/commentsViewScreen.dart';
-import '../../layouts/homeLayoutScreen/home_layout_screen.dart';
 import '../../layouts/layoutCubit/layoutCubit.dart';
 import '../../layouts/layoutCubit/layoutStates.dart';
 import '../../layouts/likesViewScreen/likesViewScreen.dart';
@@ -15,8 +14,6 @@ import '../edit_post/edit_post_screen.dart';
 
 // خلي بالك في حاجه لازم اعدلها بخصوص ظهور عدد الكومنتات اما افتح بوست بتاعي عشن عدلت علي صفحه الكومنتات واستعملت حاجه تانيه بدل setState
 class PostDetailsScreen extends StatelessWidget{
-  // هنا محتاج اجيب postsID بس للبوستات بتاعتي عشان ابعت ID اما استدعي state ده عشان لو عاوز اعمل update or delete for post
-  // هستدعيها اما اشغط علي صوره البوست في صفحه البروفايل بتاعي
   String postID;  // as it not saved with post data on fireStore so i will get when i call this state from PostsID that use in usersPostsData
   PostDataModel model;  // to get post data to be able to update it throw its id and the maker of it
   int commentsNumber ;
@@ -37,6 +34,10 @@ class PostDetailsScreen extends StatelessWidget{
                 {
                   commentsNumber = commentsNumber + 1 ;
                 }
+              if( state is DeletePostSuccessfullyState || state is UpdatePostSuccessfullyState )
+              {
+                Navigator.pop(context);
+              }
             },
             builder: (context,state){
               final cubit = LayoutCubit.getCubit(context);
@@ -64,9 +65,10 @@ class PostDetailsScreen extends StatelessWidget{
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.only(left: 10,right: 5,top: 5),
+          padding: const EdgeInsets.only(left: 10,right: 5),
           child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
               Container(
                   clipBehavior: Clip.hardEdge,
@@ -89,7 +91,7 @@ class PostDetailsScreen extends StatelessWidget{
               ),
               const Spacer(),
               GestureDetector(
-                  child: Icon(Icons.more_vert,color: blackColor.withOpacity(0.5),size: 25,),
+                  child: Icon(Icons.more_vert,color: blackColor.withOpacity(0.4),size: 30,),
                   onTap: ()
                   {
                     showMenu(
@@ -122,7 +124,7 @@ class PostDetailsScreen extends StatelessWidget{
             ],
           ),
         ),
-        const SizedBox(height: 10,),
+        const SizedBox(height: 17,),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12),
           child: model.postCaption != null ? Text(model.postCaption!,style: const TextStyle(fontSize: 18),) : const Text(''),
@@ -142,11 +144,11 @@ class PostDetailsScreen extends StatelessWidget{
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12.0),
           child: Align(
-            alignment: AlignmentDirectional.topStart,
+            alignment: AlignmentDirectional.topEnd,
             child: InkWell(
               onTap: ()
               {
-                Navigator.push(context, MaterialPageRoute(builder: (context){return CommentsScreen(postID: postID, postMakerID: model.userID!);}));
+                Navigator.push(context, MaterialPageRoute(builder: (context){return CommentsScreen(postID: postID, postMakerID: model.userID!,comeFromHomeScreenNotPostDetailsScreen: false,);}));
               },
               child: commentsNumber != null ?
                   // عملت حوار add comment success عشان اما يضيف كومنت يحصل ريفرش لل UI بحيث يظهر انه زاد واحد
@@ -176,15 +178,19 @@ class PostDetailsScreen extends StatelessWidget{
                                 setState((){
                                   if( cubit.likeStatusForMeOnSpecificPost == true )
                                   {
-                                    cubit.removeLike(postID: postID);
+                                    cubit.removeLike(postID: postID,postMakerID: model.userID!);
                                     cubit.likeStatusForMeOnSpecificPost = false ;
-                                    cubit.emptyUsersPostsDataAndCallMethod();  // maybe delete it عشان لو حصل مشكله بعدين بسبب النقطه احذفها عشان كان شغال زي الفل
+                                    cubit.usersPostsData.clear();   // عشان اما اعمل لايك او احذه يروح يجيب داتا جديده ف صفحه home عشان يكون حصل لها update
+                                    cubit.likesPostsData.clear();
+                                    cubit.getUsersPosts();
                                   }
                                   else
                                   {
-                                    cubit.addLike(postID: postID);
+                                    cubit.addLike(postID: postID,postMakerID: model.userID!);
                                     cubit.likeStatusForMeOnSpecificPost = true ;   // لأن انا بلعب علي لو قيمتها لا تساوي صفر يبقي كده في قيمه
-                                    cubit.emptyUsersPostsDataAndCallMethod();
+                                    cubit.usersPostsData.clear();   // عشان اما اعمل لايك او احذه يروح يجيب داتا جديده ف صفحه home عشان يكون حصل لها update
+                                    cubit.likesPostsData.clear();
+                                    cubit.getUsersPosts();
                                   }
                                 });
                               },
@@ -253,7 +259,7 @@ class PostDetailsScreen extends StatelessWidget{
                         child: InkWell(
                           onTap: ()
                           {
-                            Navigator.push(context, MaterialPageRoute(builder: (context){return CommentsScreen(postID: postID, postMakerID: model.userID!);}));
+                            Navigator.push(context, MaterialPageRoute(builder: (context){return CommentsScreen(postID: postID, postMakerID: model.userID!,comeFromHomeScreenNotPostDetailsScreen: false,);}));
                           },
                           child: Container(
                             padding: const EdgeInsets.all(10),

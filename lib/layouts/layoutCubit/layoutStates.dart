@@ -34,6 +34,8 @@ class UpdateUserDataWithImageLoadingState extends LayoutStates{}
 
 class UpdateUserDataWithImageErrorState extends LayoutStates{}
 
+class ErrorDuringOpenWebsiteUrlState extends LayoutStates{}
+
 class UploadUserImageErrorState extends LayoutStates{}
 
 class CanceledUpdateUserDataState extends LayoutStates{}

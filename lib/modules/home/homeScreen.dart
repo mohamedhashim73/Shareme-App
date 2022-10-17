@@ -24,12 +24,14 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Builder(
       builder: (context) {
-        LayoutCubit.getCubit(context)..getMyData()..getUsersPosts();
+        // call this if open comments throw postDetailsScreen to keep with the update that happen on it
+        if( LayoutCubit.getCubit(context).usersPostsData.isEmpty || LayoutCubit.getCubit(context).userData == null )
+          {
+            LayoutCubit.getCubit(context)..getMyData()..getUsersPosts();
+            LayoutCubit.getCubit(context).openCommentsThrowPostDetailsScreen = false;
+          }
         return BlocConsumer<LayoutCubit,LayoutStates>(
-            listener: (context,state)
-            {
-              // ده انا عاملها عشان اشوف كده هل هيتم حل مشكله لو عملت لايك ع بوست وجت اعمل بوست جديد بيحصل تكرار للبوست اللي عملت له لايك
-            },
+            listener: (context,state){},
             builder: (context,state){
               final cubit = LayoutCubit.getCubit(context);
               return Scaffold(
@@ -181,13 +183,6 @@ class _HomeScreenState extends State<HomeScreen> {
                             },
                             child: const Text('delete post'),
                           ),
-                          PopupMenuItem(
-                            onTap: ()
-                            {
-                              cubit.deleteUser(personID: cubit.usersPostsData[index].userID!,);
-                            },
-                            child: const Text('delete User'),
-                          ),
                         ]
                     );
                   }
@@ -225,7 +220,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: InkWell(
                       onTap: ()
                       {
-                        Navigator.push(context, MaterialPageRoute(builder: (context){return CommentsScreen(postID: cubit.postsID[index], postMakerID: model.userID!,postIndex: index,);}));
+                        Navigator.push(context, MaterialPageRoute(builder: (context){return CommentsScreen(postID: cubit.postsID[index], postMakerID: model.userID!,postIndex: index,comeFromHomeScreenNotPostDetailsScreen: true,);}));
                       },
                       child: cubit.commentsNumber[index] != null ?
                       Text("${cubit.commentsNumber[index]} comments",style: Theme.of(context).textTheme.caption,) :
@@ -261,18 +256,18 @@ class _HomeScreenState extends State<HomeScreen> {
                                 setstate((){
                                   if( cubit.likesPostsData[index] == true )
                                   {
-                                    cubit.removeLike(postID: cubit.postsID[index]);
+                                    cubit.removeLike(postID: cubit.postsID[index],postMakerID: cubit.usersPostsData[index].userID!);
                                     cubit.likesPostsData[index] = false ;
                                   }
                                   else
                                   {
-                                    cubit.addLike(postID: cubit.postsID[index]);
+                                    cubit.addLike(postID: cubit.postsID[index],postMakerID: cubit.usersPostsData[index].userID!);
                                     cubit.likesPostsData[index] = true ;   // لأن انا بلعب علي لو قيمتها لا تساوي صفر يبقي كده في قيمه
                                   }
                                 });
                               },
                               // عملت لا يساوي صفر عشان انا قلت لو id مش نفسه بتاعي خزن صفر طب لو بتاعي هخزن الداتا بتاعت likePostData في List عشان اعرضها في صفحه اللايكات
-                              child: Icon(Icons.favorite,color: cubit.likesPostsData[index] == false || cubit.likesPostsData[index] == null ? Colors.grey : Colors.red,size: 22)
+                              child: Icon(Icons.favorite,color: cubit.likesPostsData[index] == true ? Colors.red : Colors.grey,size: 22)
                           );
                         },
                       ),
@@ -294,7 +289,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     GestureDetector(
                         onTap:()
                         {
-                          Navigator.push(context, MaterialPageRoute(builder: (context){return CommentsScreen(postID: cubit.postsID[index], postMakerID: model.userID!,postIndex: index,);}));
+                          Navigator.push(context, MaterialPageRoute(builder: (context){return CommentsScreen(postID: cubit.postsID[index], postMakerID: model.userID!,postIndex: index,comeFromHomeScreenNotPostDetailsScreen: true,);}));
                         },child: const Icon(Icons.messenger_outline,color: Colors.grey,size: 22,)),
                     const SizedBox(width: 7,),
                     Text("comments",style: Theme.of(context).textTheme.caption),
@@ -340,7 +335,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: InkWell(
                           onTap: ()
                           {
-                            Navigator.push(context, MaterialPageRoute(builder: (context){return CommentsScreen(postID: cubit.postsID[index], postMakerID: model.userID!,postIndex: index,);}));
+                            Navigator.push(context, MaterialPageRoute(builder: (context){return CommentsScreen(postID: cubit.postsID[index], postMakerID: model.userID!,postIndex: index,comeFromHomeScreenNotPostDetailsScreen: true,);}));
                           },
                           child: Container(
                             padding: const EdgeInsets.all(10),

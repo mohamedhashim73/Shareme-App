@@ -8,18 +8,30 @@ import '../../shared/components/components.dart';
 import '../../shared/styles/colors.dart';
 
 class CommentsScreen extends StatelessWidget {
+  bool comeFromHomeScreenNotPostDetailsScreen;    // عشان لو جاي م post details هعمل getUsersPostsData بحيث يحصل تعديل ع الداتا عشان لو عملت كومنت غير كده مش هستدعيها
   final commentController = TextEditingController();
   int? postIndex ;    // عشان هاخده م صفحه home وهلعب علي قيمته بحيث تتغير في صفحه home بعد اضافه comment
   String postMakerID;
   String postID;  // to enable to get the comments for this post
-  CommentsScreen({super.key,required this.postID,required this.postMakerID,this.postIndex});
+  CommentsScreen({super.key,required this.postID,required this.postMakerID,this.postIndex,required this.comeFromHomeScreenNotPostDetailsScreen});
   @override
   Widget build(BuildContext context) {
     return Builder(
       builder: (context) {
         LayoutCubit.getCubit(context).getComments(postMakerID: postMakerID, postID: postID);
         return BlocConsumer<LayoutCubit,LayoutStates>(
-            listener: (context,state){},
+            listener: (context,state)
+            {
+              if( comeFromHomeScreenNotPostDetailsScreen != true && state is AddCommentSuccessState )
+                {
+                  LayoutCubit.getCubit(context).openCommentsThrowPostDetailsScreen = true;
+                  LayoutCubit.getCubit(context).usersPostsData.clear();
+                  LayoutCubit.getCubit(context).postsID.clear();
+                  LayoutCubit.getCubit(context).commentsNumber.clear();
+                  LayoutCubit.getCubit(context).likesPostsData.clear();
+                  LayoutCubit.getCubit(context).getUsersPosts();
+                }
+            },
             builder: (context,state){
               final cubit = LayoutCubit.getCubit(context);
               return Scaffold(
@@ -29,7 +41,7 @@ class CommentsScreen extends StatelessWidget {
                   leading: defaultTextButton(title: const Icon(Icons.arrow_back_ios), onTap: (){Navigator.pop(context);}),
                 ),
                 body: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 10,horizontal: 15.0),
+                      padding: const EdgeInsets.symmetric(vertical: 2.5,horizontal: 15.0),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children:
@@ -64,11 +76,15 @@ class CommentsScreen extends StatelessWidget {
                                       onFieldSubmitted: (val)
                                       {
                                         // postIndex will get it when i call this screen from homeScreen to use it to increase the number by one after add a comments
-                                        cubit.addComment(comment: val,postID:postID);
+                                        cubit.addComment(comment: val,postID:postID,postMakerID: postMakerID);
                                         setState((){
                                           commentController.text = '';
                                           cubit.commentsNumber[postIndex!] = cubit.commentsNumber[postIndex!] + 1 ;
                                         });
+                                        if( comeFromHomeScreenNotPostDetailsScreen == true )
+                                          {
+                                            cubit.openCommentsThrowPostDetailsScreen = false;  // عشان انا هلعب ع قيمه المتغير ده ف انه يعمل getUsersPosts ولا لاء ....
+                                          }
                                       },
                                       decoration: InputDecoration(
                                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(22),borderSide: BorderSide(color: Colors.grey.withOpacity(0.2))),
@@ -97,7 +113,7 @@ class CommentsScreen extends StatelessWidget {
       children:
       [
         CircleAvatar(
-          radius: 23,
+          radius: 27,
           backgroundImage: NetworkImage(model.commentMakerImage!),
         ),
         const SizedBox(width: 10,),

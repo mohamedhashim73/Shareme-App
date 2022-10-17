@@ -71,7 +71,7 @@ class CreateStoryScreen extends StatelessWidget {
       child: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.only(left: 10,right: 5,top: 2.5),
+            padding: const EdgeInsets.only(left: 10,right: 5),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
@@ -97,63 +97,55 @@ class CreateStoryScreen extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 20,),
-          cubit.storyImage != null ?
-          Expanded(
-            child: SingleChildScrollView(
-              child: Column(
-                children:
-                [
-                  if( cubit.storyImage != null )
-                    Stack(
-                      alignment: AlignmentDirectional.topEnd,
-                      children: [
-                        SizedBox(
-                            width: double.infinity,
-                            child: Image(image: FileImage(cubit.storyImage!))
-                          // Image.network(cubit.postImageUrl!,fit: BoxFit.fitHeight,height: 250),
-                        ),
-                        GestureDetector(
-                          onTap: ()
-                          {
-                            cubit.canceledImageForStory();
-                          },
-                          child: Container(margin:const EdgeInsets.all(7.5),child: const CircleAvatar(radius: 15,child:Icon(Icons.close,size: 20,),)),
-                        ),
-                      ],
+          if( cubit.storyImage != null )
+            Expanded(
+              child: Center(
+                child: Stack(
+                  alignment: AlignmentDirectional.topEnd,
+                  children: [
+                    SizedBox(
+                        child: Image(image: FileImage(cubit.storyImage!))
+                      // Image.network(cubit.postImageUrl!,fit: BoxFit.fitHeight,height: 250),
                     ),
-                  const SizedBox(height: 10,),
-                  if( cubit.storyImage != null )
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                      width: double.infinity,
-                      alignment: Alignment.center,
-                      child: TextFormField(
-                        // maxLines: 2,
-                        controller: storyCaptionController,
-                        decoration: InputDecoration(
-                            border: InputBorder.none,
-                            contentPadding: const EdgeInsets.all(0),
-                            hintText: "type title for story here ....",
-                            hintStyle: Theme.of(context).textTheme.caption!.copyWith(fontSize: 16)
-                        ),
-                      ),
+                    GestureDetector(
+                      onTap: ()
+                      {
+                        cubit.canceledImageForStory();
+                      },
+                      child: Container(margin:const EdgeInsets.all(7.5),child: const CircleAvatar(radius: 15,child:Icon(Icons.close,size: 20,),)),
                     ),
-                ],
+                  ],
+                ),
               ),
             ),
-          ) :
-          Expanded(
-            child: Center(
-                child: GestureDetector(
-                  child: const Text("Select Image",style: TextStyle(color: mainColor,fontWeight: FontWeight.bold,fontSize: 20),),
-                  onTap: ()
-                  {
-                    cubit.getStoryImage();
-                  },
-                )
+          if( cubit.storyImage != null )
+            Container(
+              height: 75,
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 12.0),
+              alignment: Alignment.center,
+              child: TextFormField(
+                controller: storyCaptionController,
+                decoration: InputDecoration(
+                    border: InputBorder.none,
+                    contentPadding: const EdgeInsets.all(0),
+                    hintText: "type title for story here ....",
+                    hintStyle: Theme.of(context).textTheme.caption!.copyWith(fontSize: 16)
+                ),
+              ),
             ),
-          ),
+          if( cubit.storyImage == null )
+            Expanded(
+              child: Center(
+                  child: GestureDetector(
+                    child: const Text("Select Image",style: TextStyle(color: mainColor,fontWeight: FontWeight.bold,fontSize: 20),),
+                    onTap: ()
+                    {
+                      cubit.getStoryImage();
+                    },
+                  )
+              ),
+            ),
         ],
       ),
     );

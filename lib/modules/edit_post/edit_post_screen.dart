@@ -5,7 +5,6 @@ import 'package:social_app/models/post_Data_Model.dart';
 import 'package:social_app/modules/profile/profileScreen.dart';
 import 'package:social_app/shared/components/constants.dart';
 import 'package:social_app/shared/styles/colors.dart';
-import '../../layouts/homeLayoutScreen/home_layout_screen.dart';
 import '../../layouts/layoutCubit/layoutCubit.dart';
 import '../../layouts/layoutCubit/layoutStates.dart';
 import '../../shared/components/components.dart';
@@ -13,31 +12,31 @@ import '../../shared/components/components.dart';
 class EditPostScreen extends StatelessWidget{
   String postID;  // as it not saved with post data on fireStore so i will get when i call this state from PostsID that use in usersPostsData
   PostDataModel model;  // to get post data to be able to update it throw its id and the maker of it
-  final captionController = TextEditingController();
+  TextEditingController captionController = TextEditingController();
   EditPostScreen({super.key,required this.model,required this.postID});
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<LayoutCubit,LayoutStates>(
-        listener: (context,state)
-        {
-          if( state is UpdatePostSuccessfullyState )
-          {
-            showDefaultSnackBar(message: "Post Updated successfully!", context: context, color: Colors.grey);
-            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>ProfileScreen()));
-            LayoutCubit.getCubit(context).postImageFile = null ;
-          }
-        },
-        builder: (context,state){
-          final cubit = LayoutCubit.getCubit(context);
-          captionController.text = model.postCaption!;
-          return Scaffold(
-            backgroundColor: whiteColor,
-            appBar: AppBar(
-              title: const Text("Update Post"),titleSpacing: 0,
-              leading: defaultTextButton(title: const Icon(Icons.arrow_back_ios), onTap: (){Navigator.pop(context);}),
-              actions:
-              [
-                Padding(
+    captionController.text = model.postCaption.toString();
+    final cubit = LayoutCubit.getCubit(context);
+    return Scaffold(
+      backgroundColor: whiteColor,
+      appBar: AppBar(
+        title: const Text("Update Post"),titleSpacing: 0,
+        leading: defaultTextButton(title: const Icon(Icons.arrow_back_ios), onTap: (){Navigator.pop(context);}),
+        actions:
+        [
+          BlocConsumer<LayoutCubit,LayoutStates>(
+              listener: (context,state)
+              {
+                if( state is UpdatePostSuccessfullyState )
+                {
+                  showDefaultSnackBar(message: "Post Updated successfully!", context: context, color: Colors.green);
+                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>ProfileScreen()));
+                  LayoutCubit.getCubit(context).postImageFile = null ;
+                }
+              },
+              builder: (context,state){
+                return Padding(
                   padding: const EdgeInsets.only(right: 12.0),
                   child: state is UpdatePostLoadingState ?
                   const CupertinoActivityIndicator(color: mainColor) :
@@ -48,16 +47,15 @@ class EditPostScreen extends StatelessWidget{
                       cubit.updatePost(postMakerID: model.userID!, postID: postID, postMakerName: model.userName!, postMakerImage: model.userImage!, postCaption: captionController.text, postDate: model.postDate!, postImage: model.postImage!);
                     },
                   ),
-                )
-              ],
-            ),
-            body: model.userID == null ?
-            const Center(child: CircularProgressIndicator(color: mainColor,),) :
-            SingleChildScrollView(
-              child: buildPostItem(context: context,model: model),
-            ),
-          );
-        }
+                );
+              }),
+        ],
+      ),
+      body: model.userID == null ?
+      const Center(child: CircularProgressIndicator(color: mainColor,),) :
+      SingleChildScrollView(
+        child: buildPostItem(context: context,model: model),
+      ),
     );
   }
 
@@ -66,7 +64,7 @@ class EditPostScreen extends StatelessWidget{
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.only(left: 10,right: 5,top: 10),
+          padding: const EdgeInsets.only(left: 10,right: 5),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
@@ -94,14 +92,13 @@ class EditPostScreen extends StatelessWidget{
             ],
           ),
         ),
-        const SizedBox(height: 10,),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12),
           child: TextFormField(
             controller: captionController,
             decoration: const InputDecoration(
                 border: InputBorder.none,
-                contentPadding: EdgeInsets.all(0),
+                contentPadding:  EdgeInsets.all(0),
             ),
           ),
         ),
