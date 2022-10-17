@@ -53,14 +53,11 @@ class LayoutCubit extends Cubit<LayoutStates>{
   List<UserDataModel> usersData = [];
   List<String> usersID = [];
   void getUsersData(){
-    if( usersData.isEmpty )
-    {
-      FirebaseFirestore.instance.collection('users').snapshots().listen((value){
-      usersData = [];
-      usersID = [];
+    usersData.clear();
+    usersID.clear();
+    FirebaseFirestore.instance.collection('users').get().then((value){
       value.docs.forEach((element) {
-        print(element.id);
-        if( userData?.userID != element.id)
+        if( userData!.userID != element.data()['userID'])
         {
           usersID.add(element.id);
           usersData.add(UserDataModel.fromJson(element.data()));
@@ -68,7 +65,6 @@ class LayoutCubit extends Cubit<LayoutStates>{
         emit(GetUsersDataSuccessState());
       });
     });
-    }
   }
 
   bool profileImageChosen = true ;   // this for show images or videos on Profile Screen as User's Tap

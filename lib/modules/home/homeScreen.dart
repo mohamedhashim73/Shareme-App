@@ -10,6 +10,7 @@ import 'package:social_app/models/post_Data_Model.dart';
 import 'package:social_app/modules/edit_post/edit_post_screen.dart';
 import 'package:social_app/modules/profile/profileScreen.dart';
 import 'package:social_app/shared/styles/colors.dart';
+import '../../layouts/relatedToSpecificUser/profileForSpecificUser/profilScreenForSpecificUser.dart';
 import '../../shared/components/components.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -127,19 +128,32 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Stack(
-                alignment: AlignmentDirectional.center,
-                children: [
-                  CircleAvatar(
-                    radius: 21.5,
-                    backgroundColor: blackColor.withOpacity(0.5),
-                  ),
-                  CircleAvatar(
-                    radius: 20,
-                    // did yhe condition down as if I update my date will show with update as I sent data with post with the last data for me like my image for example
-                    backgroundImage: NetworkImage(cubit.userData!.userID == cubit.usersPostsData[index].userID ? cubit.userData!.image!: model.userImage!),
-                  ),
-                ],
+              GestureDetector(
+                onTap:()
+                  {
+                    if( cubit.userData!.userID != cubit.usersPostsData[index].userID )
+                    {
+                      Navigator.push(context, MaterialPageRoute(builder: (context)=>ProfileScreenForSpecificUser(specificUserID: model.userID.toString())));
+                    }
+                    else
+                    {
+                      Navigator.push(context, MaterialPageRoute(builder: (context)=>ProfileScreen()));
+                    }
+                  },
+                child: Stack(
+                  alignment: AlignmentDirectional.center,
+                  children: [
+                    CircleAvatar(
+                      radius: 21.5,
+                      backgroundColor: blackColor.withOpacity(0.5),
+                    ),
+                    CircleAvatar(
+                      radius: 20,
+                      // did yhe condition down as if I update my date will show with update as I sent data with post with the last data for me like my image for example
+                      backgroundImage: NetworkImage(cubit.userData!.userID == cubit.usersPostsData[index].userID ? cubit.userData!.image!: model.userImage!),
+                    ),
+                  ],
+                ),
               ),
               const SizedBox(width: 13,),
               Column(
@@ -147,7 +161,19 @@ class _HomeScreenState extends State<HomeScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // did yhe condition down as if I update my date will show with update as I sent data with post with the last data for me like my image for example
-                  Text(cubit.userData!.userID == cubit.usersPostsData[index].userID ? cubit.userData!.userName!: model.userName!,style: const TextStyle(fontSize: 16),),
+                  GestureDetector(
+                    onTap: ()
+                    {
+                      if( cubit.userData!.userID != cubit.usersPostsData[index].userID )
+                      {
+                        Navigator.push(context, MaterialPageRoute(builder: (context)=>ProfileScreenForSpecificUser(specificUserID: model.userID.toString())));
+                      }
+                      else
+                      {
+                        Navigator.push(context, MaterialPageRoute(builder: (context)=>ProfileScreen()));
+                      }
+                    },
+                      child: Text(cubit.userData!.userID == cubit.usersPostsData[index].userID ? cubit.userData!.userName!: model.userName!,style: const TextStyle(fontSize: 16),)),
                   const SizedBox(height: 2,),
                   Text(model.postDate!,style: Theme.of(context).textTheme.caption,),
                 ],
@@ -197,7 +223,7 @@ class _HomeScreenState extends State<HomeScreen> {
           Container(
             color: model.postImage == '' ? Colors.white.withOpacity(0.2) : whiteColor,
             padding : const EdgeInsets.symmetric(horizontal: 12.0,vertical: 5),
-            child: Text(model.postCaption!,style: model.postImage == '' ? const TextStyle(fontWeight: FontWeight.w400,fontSize: 18.5) : const TextStyle(fontSize: 17)),
+            child: Text(model.postCaption!,style: model.postImage == '' ? const TextStyle(fontWeight: FontWeight.w400,fontSize: 18.5,height: 1.4) : const TextStyle(fontSize: 17,height: 1.2)),
           ),
         if( model.postImage != '' )   // as if image not exist postImage on fireStore will have '' value
           const SizedBox(height: 10,),

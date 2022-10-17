@@ -1,0 +1,25 @@
+abstract class SpecificUserStates{}
+
+class InitialSpecificUserState extends SpecificUserStates{}
+
+class GetSpecificUserDataSuccessState extends SpecificUserStates{}
+
+class GetPostsForSpecificUserLoadingState extends SpecificUserStates{}
+
+class GetPostsForSpecificUserSuccessState extends SpecificUserStates{}
+
+class GetArchivedStoriesForSpecificUserLoadingState extends SpecificUserStates{}
+
+class GetArchivedStoriesForSpecificUserSuccessState extends SpecificUserStates{}
+
+class GetArchivedStoriesForSpecificUserErrorState extends SpecificUserStates{}
+
+class GetLikeStatusOnPostForSpecificUserLoadingState extends SpecificUserStates{}
+
+class GetLikeStatusOnPostForSpecificUserSuccessState extends SpecificUserStates{}
+
+class AddLikeSuccessfullyFromSpecificUserState extends SpecificUserStates{}
+
+class RemoveLikeSuccessfullyFromSpecificUserState extends SpecificUserStates{}
+
+class ErrorDuringOpenWebsiteUrlForSpecificUserState extends SpecificUserStates{}

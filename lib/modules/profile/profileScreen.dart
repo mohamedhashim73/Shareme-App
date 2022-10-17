@@ -125,6 +125,7 @@ class ProfileScreen extends StatelessWidget {
                                       }
                                   ),
                                 ),
+                              const SizedBox(height: 3,),
                               Row(
                                 children: [
                                   Expanded(
@@ -135,60 +136,64 @@ class ProfileScreen extends StatelessWidget {
                                           },
                                           child: const Text("Edit profile",style:TextStyle(fontSize: 16.5)))),
                                   const SizedBox(width: 5,),
-                                  OutlinedButton(onPressed: (){}, child: const Icon(Icons.edit,size: 19,)),
+                                  OutlinedButton(
+                                      onPressed: ()
+                                      {
+                                        if( cubit.storiesData.length < 3 )
+                                        {
+                                          Navigator.push(context, MaterialPageRoute(builder: (context)=>CreateStoryScreen()));
+                                        }
+                                        else
+                                        {
+                                          showDefaultSnackBar(message: "sorry, only 3 stories allowed for you", context: context, color: Colors.red);
+                                        }
+                                      },
+                                      child: const Icon(Icons.image,size: 19,)
+                                  ),
                                 ],
                               ),
-                              const SizedBox(height: 15),
+                              const SizedBox(height: 12.5),
                               // Related to Archived Story in Profile
-                              SizedBox(
-                                height: 90,
-                                // width: double.infinity,
-                                child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children:
-                                    [
-                                       if( cubit.storiesData.isNotEmpty )
-                                          Expanded(
-                                            // flex:1,
-                                            child: GridView.builder(
-                                              itemCount: cubit.storiesData.length,
-                                              scrollDirection: Axis.horizontal,
-                                              shrinkWrap: true,
-                                              physics: const BouncingScrollPhysics(),
-                                              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount:1,mainAxisSpacing: 0,childAspectRatio: 1.1),
-                                              itemBuilder: (context,i){
-                                                return buildArchivedStory(context: context, model: cubit.storiesData[i]);
-                                              },
-                                            ),
-                                          ),
-                                      Align(
-                                        alignment: AlignmentDirectional.topEnd,
-                                        child: InkWell(
-                                            onTap:(){
-                                              Navigator.push(context, MaterialPageRoute(builder: (context)=>CreateStoryScreen()));
-                                            },
-                                            child: Column(
-                                              children: [
-                                                Container(
-                                                  height: 65,
-                                                  width: 65,
-                                                  alignment: Alignment.center,
-                                                  clipBehavior: Clip.hardEdge,
-                                                  decoration: BoxDecoration(shape: BoxShape.circle,border: Border.all(color: blackColor.withOpacity(0.5))),
-                                                  child: const Icon(Icons.add)),
-                                                const SizedBox(height: 10,),
-                                                Text("add story",style: Theme.of(context).textTheme.bodyLarge!.copyWith(fontSize: 12),),
-                                              ],
-                                            ),
-                                          ),
-                                      ),
-                                    ]
+                              if( cubit.storiesData.isEmpty )
+                                Align(
+                                  alignment: AlignmentDirectional.topStart,
+                                  child: InkWell(
+                                    onTap:()
+                                    {
+                                      Navigator.push(context, MaterialPageRoute(builder: (context)=>CreateStoryScreen()));
+                                    },
+                                    child: Column(
+                                      children: [
+                                        Container(
+                                            height: 65,
+                                            width: 65,
+                                            alignment: Alignment.center,
+                                            clipBehavior: Clip.hardEdge,
+                                            decoration: BoxDecoration(shape: BoxShape.circle,border: Border.all(color: blackColor.withOpacity(0.5))),
+                                            child: const Icon(Icons.add)),
+                                        const SizedBox(height: 10,),
+                                        Text("add story",style: Theme.of(context).textTheme.bodyLarge!.copyWith(fontSize: 12),),
+                                      ],
+                                    ),
                                   ),
-                              ),
-                              const SizedBox(height: 12.5,),
-                              if( state is! GetUserPostsLoadingState )
-                                Row(
+                                ),
+                              if( cubit.storiesData.isNotEmpty )
+                                SizedBox(
+                                  height: 90,
+                                  // width: double.infinity,
+                                  child: GridView.builder(
+                                    itemCount: cubit.storiesData.length,
+                                    scrollDirection: Axis.horizontal,
+                                    shrinkWrap: true,
+                                    physics: const BouncingScrollPhysics(),
+                                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount:1,mainAxisSpacing: 0,childAspectRatio: 1.1),
+                                    itemBuilder: (context,i){
+                                      return buildArchivedStory(context: context, model: cubit.storiesData[i]);
+                                    },
+                                  ),
+                                ),
+                              const SizedBox(height: 10,),
+                              Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children:
                                   [
@@ -259,26 +264,22 @@ class ProfileScreen extends StatelessWidget {
   }
 
   Widget buildArchivedStory({required BuildContext context,required StoryDataModel model}){
-    return Container(
-      margin: const EdgeInsets.only(right: 12.5),
-      child: InkWell(
-        onTap:()
-        {
-          // open the story in separated screen (( لو هعمل بروفايل لشخص تاني هبقي اباصي المودل تبعه ))
-          Navigator.push(context, MaterialPageRoute(builder: (context)=>StoryShownScreen(storyModel: model, userModel: LayoutCubit.getCubit(context).userData!)));
-        },
-        child: Column(
-          children: [
-            Container(
-              height: 65,
-              width: 65,
-              clipBehavior: Clip.hardEdge,
-              decoration: BoxDecoration(shape: BoxShape.circle,border: Border.all(color: blackColor.withOpacity(0.5))),
-              child: Image(image: NetworkImage(model.storyImage.toString()),fit: BoxFit.cover,),),
-            const SizedBox(height: 10,),
-            Text(model.storyTitle.toString(),style: Theme.of(context).textTheme.bodyLarge!.copyWith(fontSize: 13),maxLines: 1,overflow: TextOverflow.ellipsis,),
-          ],
-        ),
+    return InkWell(
+      onTap:()
+      {
+        Navigator.push(context, MaterialPageRoute(builder: (context)=>StoryShownScreen(storyModel: model, userModel: LayoutCubit.getCubit(context).userData!)));
+      },
+      child: Column(
+        children: [
+          Container(
+            height: 65,
+            width: 65,
+            clipBehavior: Clip.hardEdge,
+            decoration: BoxDecoration(shape: BoxShape.circle,border: Border.all(color: blackColor.withOpacity(0.5))),
+            child: Image(image: NetworkImage(model.storyImage.toString()),fit: BoxFit.cover,),),
+          const SizedBox(height: 10,),
+          Text(model.storyTitle.toString(),style: Theme.of(context).textTheme.bodyLarge!.copyWith(fontSize: 13),maxLines: 1,overflow: TextOverflow.ellipsis,),
+        ],
       ),
     );
   }

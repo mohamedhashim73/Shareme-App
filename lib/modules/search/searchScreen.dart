@@ -5,6 +5,11 @@ import 'package:social_app/layouts/layoutCubit/layoutCubit.dart';
 import 'package:social_app/layouts/layoutCubit/layoutStates.dart';
 import 'package:social_app/models/user_data_model.dart';
 
+import '../../layouts/layoutCubit/layoutCubit.dart';
+import '../../layouts/layoutCubit/layoutCubit.dart';
+import '../../layouts/relatedToSpecificUser/profileForSpecificUser/profilScreenForSpecificUser.dart';
+import '../profile/profileScreen.dart';
+
 class SearchScreen extends StatelessWidget {
   final searchController = TextEditingController();
 
@@ -62,13 +67,7 @@ class SearchScreen extends StatelessWidget {
                         physics: const BouncingScrollPhysics(),
                         itemCount: cubit.searchData.length,   // type cubit.searchData.length
                         itemBuilder: (context,index){
-                          return GestureDetector(
-                              onTap: ()
-                              {
-                                // here after click will go to his profile page
-                              },
-                              child: buildUserItemShown(model: cubit.searchData[index])
-                          );
+                          return buildUserItemShown(model: cubit.searchData[index],context: context,cubit: cubit);
                         },
                       ) :
                         state is SearchForUserLoadingState ?
@@ -84,12 +83,24 @@ class SearchScreen extends StatelessWidget {
   }
 
   // build the item that user will be shown in this screen => after click on the user, will go to his profile
-  Widget buildUserItemShown({required UserDataModel model}){
-    return ListTile(
-      contentPadding: const EdgeInsets.all(0),
-      leading: CircleAvatar(radius: 25,backgroundImage: NetworkImage(model.image!)),     // model.image!
-      title: Text(model.userName!),    // model.userName!
-      subtitle: Text(model.bio!),   // model.bio!
+  Widget buildUserItemShown({required UserDataModel model,required LayoutCubit cubit,required BuildContext context}){
+    return GestureDetector(
+      onTap:() {
+        if( model.userID != cubit.userData!.userID! )
+        {
+          Navigator.push(context, MaterialPageRoute(builder: (context)=>ProfileScreenForSpecificUser(specificUserID: model.userID.toString())));
+        }
+        else
+        {
+          Navigator.push(context, MaterialPageRoute(builder: (context)=>ProfileScreen()));
+        }
+      },
+      child: ListTile(
+        contentPadding: const EdgeInsets.all(0),
+        leading: CircleAvatar(radius: 25,backgroundImage: NetworkImage(model.image!)),     // model.image!
+        title: Text(model.userName!),    // model.userName!
+        subtitle: Text(model.bio!),   // model.bio!
+      ),
     );
   }
 }

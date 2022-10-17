@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:social_app/layouts/layoutCubit/layoutCubit.dart';
 import 'package:social_app/layouts/homeLayoutScreen/home_layout_screen.dart';
+import 'package:social_app/layouts/relatedToSpecificUser/cubit/cubit_specificUser.dart';
 import 'package:social_app/modules/create_post/createPostScreen.dart';
 import 'package:social_app/modules/edit_profile/editProfileScreen.dart';
 import 'package:social_app/modules/sign_screens/cubit/signCubit.dart';
@@ -36,6 +37,7 @@ class MyApp extends StatelessWidget {
         [
           BlocProvider(create: (BuildContext context)=>SignCubit()),
           BlocProvider(create: (BuildContext context)=>LayoutCubit()),
+          BlocProvider(create: (BuildContext context)=>SpecificUserCubit()),
         ],
         child: MaterialApp(
           home: userID != null ? const HomeLayoutScreen() : LoginScreen(),
@@ -54,13 +56,3 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-
- // ***** there is a simple error happen when i add a like on any post => this post duplicate ath this moment ده تعتبر المشكله الوحيده في التطبيق حاليا والنسخه ده مرفوعه علي github
-
- // المشكله دلوقتي بتحصل مع اللايك عموما سواء م البروفايل او حتي صفحه homeLayoutScreen
- /*
-   1. البروفايل للاخرين
-   2. علاج نقطه اللايك
-   3. عمل متغير خاص بعدد اللايكات
-   4. الاستوري في صفحه البروفايل
- */

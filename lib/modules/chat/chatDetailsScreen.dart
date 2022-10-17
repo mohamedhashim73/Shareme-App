@@ -40,7 +40,7 @@ class ChatDetailsScreen extends StatelessWidget {
                   ),
                 ),
                 body: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12.0,vertical: 10),
+                  padding: const EdgeInsets.symmetric(horizontal: 12.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.max,
@@ -61,7 +61,7 @@ class ChatDetailsScreen extends StatelessWidget {
                           ),
                         ),
                       Container(
-                        margin: const EdgeInsets.only(top: 10),
+                        margin: const EdgeInsets.symmetric(vertical: 10),
                         child: TextFormField(
                           controller: messageController,
                           onFieldSubmitted: (val)
@@ -104,10 +104,10 @@ class ChatDetailsScreen extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                  color: mainColor.withOpacity(0.7),
+                  color: mainColor.withOpacity(0.5),
                   borderRadius: const BorderRadius.only(topRight: Radius.circular(0),bottomLeft: Radius.circular(10),topLeft: Radius.circular(10),bottomRight: Radius.circular(10))
               ),
-              child: Text(model.message!,style: const TextStyle(fontWeight: FontWeight.w500),),
+              child: Text(model.message!,style: const TextStyle(fontWeight: FontWeight.w600),),
             ),
           ),),
       ],
@@ -124,10 +124,10 @@ class ChatDetailsScreen extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: mainColor.withOpacity(0.4),
+                color: mainColor.withOpacity(0.1),
                   borderRadius: const BorderRadius.only(topRight: Radius.circular(10),bottomLeft: Radius.circular(10),topLeft: Radius.circular(0),bottomRight: Radius.circular(10))
               ),
-              child: Text(model.message!,style: const TextStyle(fontWeight: FontWeight.w500),),
+              child: Text(model.message!,style: const TextStyle(fontWeight: FontWeight.w600),),
             ),
           ),),
         const Expanded(child: Text("")),

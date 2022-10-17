@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:social_app/models/user_data_model.dart';
 import 'package:social_app/modules/chat/chatDetailsScreen.dart';
-import 'package:social_app/shared/components/components.dart';
 import '../../layouts/layoutCubit/layoutCubit.dart';
 import '../../layouts/layoutCubit/layoutStates.dart';
 import '../../shared/styles/colors.dart';

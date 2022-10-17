@@ -1,74 +1,61 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:social_app/layouts/layoutCubit/layoutCubit.dart';
+import 'package:social_app/layouts/relatedToSpecificUser/cubit/cubit_specificUser.dart';
+import 'package:social_app/layouts/relatedToSpecificUser/cubit/states_specificUser.dart';
 import 'package:social_app/models/post_Data_Model.dart';
 import 'package:social_app/modules/profile/profileScreen.dart';
-import 'package:social_app/shared/components/constants.dart';
 import 'package:social_app/shared/styles/colors.dart';
-import '../../layouts/commentsViewScreen/commentsViewScreen.dart';
-import '../../layouts/layoutCubit/layoutCubit.dart';
-import '../../layouts/layoutCubit/layoutStates.dart';
-import '../../layouts/likesViewScreen/likesViewScreen.dart';
-import '../../shared/components/components.dart';
-import '../edit_post/edit_post_screen.dart';
+import '../../../shared/components/components.dart';
+import '../../commentsViewScreen/commentsViewScreen.dart';
+import '../../likesViewScreen/likesViewScreen.dart';
 
 // خلي بالك في حاجه لازم اعدلها بخصوص ظهور عدد الكومنتات اما افتح بوست بتاعي عشن عدلت علي صفحه الكومنتات واستعملت حاجه تانيه بدل setState
-class PostDetailsScreen extends StatelessWidget{
+class PostDetailsScreenForSpecificUser extends StatelessWidget{
   String postID;  // as it not saved with post data on fireStore so i will get when i call this state from PostsID that use in usersPostsData
   PostDataModel model;  // to get post data to be able to update it throw its id and the maker of it
   int commentsNumber ;
-
-  PostDetailsScreen({super.key,required this.model,required this.postID,required this.commentsNumber});
+  PostDetailsScreenForSpecificUser({super.key,required this.model,required this.postID,required this.commentsNumber});
 
   final captionController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     return Builder(
-      builder: (context) {
-        LayoutCubit.getCubit(context).getLikeStatusForMeOnSpecificPost(postMakerID: model.userID!, postID: postID);  // عشان اجيب اذا كنت عامل لايك او لاء
-        return BlocConsumer<LayoutCubit,LayoutStates>(
-            listener: (context,state)
-            {
-              if( state is AddCommentSuccessState )
-                {
-                  commentsNumber = commentsNumber + 1 ;
-                }
-              if( state is DeletePostSuccessfullyState || state is UpdatePostSuccessfullyState )
-              {
-                Navigator.pop(context);
+        builder: (context) {
+          SpecificUserCubit.getCubit(context).getLikeStatusSpecificPostForSpecificUser(postMakerID: model.userID!, postID: postID);  // عشان اجيب اذا كنت عامل لايك او لاء
+          return BlocConsumer<SpecificUserCubit,SpecificUserStates>(
+              listener: (context,state){},
+              builder: (context,state){
+                final cubit = SpecificUserCubit.getCubit(context);
+                return Scaffold(
+                    backgroundColor: whiteColor,
+                    appBar: AppBar(
+                      title: const Text("Post"),titleSpacing: 0,
+                      leading: defaultTextButton(title: const Icon(Icons.arrow_back_ios), onTap: (){Navigator.pop(context);}),
+                    ),
+                    body: model.userID == null || state is GetLikeStatusOnPostForSpecificUserLoadingState ?
+                    const Center(child: CircularProgressIndicator(color: mainColor,),) :
+                    SingleChildScrollView(
+                      physics: const BouncingScrollPhysics(),
+                      child: buildPostItem(context: context,model: model,state: state,cubit: cubit),
+                    )
+                );
               }
-            },
-            builder: (context,state){
-              final cubit = LayoutCubit.getCubit(context);
-              return Scaffold(
-                backgroundColor: whiteColor,
-                appBar: AppBar(
-                  title: const Text("Post"),titleSpacing: 0,
-                  leading: defaultTextButton(title: const Icon(Icons.arrow_back_ios), onTap: (){Navigator.pop(context);}),
-                ),
-                body: model.userID == null || state is GetLikeStatusForMeOnSpecificPostLoadingState ?
-                const Center(child: CircularProgressIndicator(color: mainColor,),) :
-                SingleChildScrollView(
-                  physics: const BouncingScrollPhysics(),
-                  child: buildPostItem(context: context,model: model,state: state,cubit: cubit),
-                )
-              );
-            }
-        );
-      }
+          );
+        }
     );
   }
 
-  Widget buildPostItem({required BuildContext context,required PostDataModel model,required LayoutStates state ,required LayoutCubit cubit}){
+  Widget buildPostItem({required BuildContext context,required PostDataModel model,required SpecificUserStates state ,required SpecificUserCubit cubit}){
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
           padding: const EdgeInsets.only(left: 10,right: 5),
           child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Container(
                   clipBehavior: Clip.hardEdge,
@@ -78,53 +65,21 @@ class PostDetailsScreen extends StatelessWidget{
                       shape: BoxShape.circle,
                       border: Border.all(color: Colors.grey.withOpacity(0.5))
                   ),
-                  child : model.userImage != null ? Image.network(cubit.userData!.image.toString(),fit: BoxFit.cover,) : const Text("")
+                  child : model.userImage != null ? Image.network(cubit.specificUserData!.image.toString(),fit: BoxFit.cover,) : const Text("")
               ),
               const SizedBox(width: 15,),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(cubit.userData!.userName.toString(),style: const TextStyle(fontSize: 16),),
+                  Text(cubit.specificUserData!.userName.toString(),style: const TextStyle(fontSize: 16),),
                   const SizedBox(height: 2,),
                   Text(model.postDate.toString(),style: Theme.of(context).textTheme.caption,),
                 ],
               ),
-              const Spacer(),
-              GestureDetector(
-                  child: Icon(Icons.more_vert,color: blackColor.withOpacity(0.4),size: 30,),
-                  onTap: ()
-                  {
-                    showMenu(
-                        context: context,
-                        elevation: 1,
-                        position: const RelativeRect.fromLTRB(25.0, 25.0, 0.0, 0.0),
-                        items:
-                        [
-                          PopupMenuItem(
-                              onTap: () {},
-                              child: GestureDetector(
-                                child: const Text('update post'),
-                                onTap: ()
-                                {
-                                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>EditPostScreen(model: model,postID: postID,)));
-                                },
-                              )
-                          ),
-                          PopupMenuItem(
-                            onTap: ()
-                            {
-                              cubit.deletePost(postMakerID: model.userID!, postID: postID);
-                            },
-                            child: const Text('delete post'),
-                          ),
-                        ]
-                    );
-                  },
-              ),
             ],
           ),
         ),
-        const SizedBox(height: 17,),
+        const SizedBox(height: 10,),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12),
           child: model.postCaption != null ? Text(model.postCaption!,style: const TextStyle(fontSize: 18,height: 1.4),) : const Text(''),
@@ -151,7 +106,7 @@ class PostDetailsScreen extends StatelessWidget{
                 Navigator.push(context, MaterialPageRoute(builder: (context){return CommentsScreen(postID: postID, postMakerID: model.userID!,comeFromHomeScreenNotPostDetailsScreen: false,);}));
               },
               child: commentsNumber != null ?
-                  // عملت حوار add comment success عشان اما يضيف كومنت يحصل ريفرش لل UI بحيث يظهر انه زاد واحد
+              // عملت حوار add comment success عشان اما يضيف كومنت يحصل ريفرش لل UI بحيث يظهر انه زاد واحد
               Text("$commentsNumber comments",style: Theme.of(context).textTheme.caption,) :
               Text("0 comments",style: Theme.of(context).textTheme.caption,),
             ),
@@ -173,39 +128,37 @@ class PostDetailsScreen extends StatelessWidget{
                       child: StatefulBuilder(
                         builder: (context,setState){
                           return GestureDetector(
-                              onTap:()
-                              {
-                                setState((){
-                                  if( cubit.likeStatusForMeOnSpecificPost == true )
-                                  {
-                                    cubit.removeLike(postID: postID,postMakerID: model.userID!);
-                                    cubit.likeStatusForMeOnSpecificPost = false ;
-                                    cubit.usersPostsData.clear();   // عشان اما اعمل لايك او احذه يروح يجيب داتا جديده ف صفحه home عشان يكون حصل لها update
-                                    cubit.likesPostsData.clear();
-                                    cubit.getUsersPosts();
-                                  }
-                                  else
-                                  {
-                                    cubit.addLike(postID: postID,postMakerID: model.userID!);
-                                    cubit.likeStatusForMeOnSpecificPost = true ;   // لأن انا بلعب علي لو قيمتها لا تساوي صفر يبقي كده في قيمه
-                                    cubit.usersPostsData.clear();   // عشان اما اعمل لايك او احذه يروح يجيب داتا جديده ف صفحه home عشان يكون حصل لها update
-                                    cubit.likesPostsData.clear();
-                                    cubit.getUsersPosts();
-                                  }
-                                });
-                              },
-                              // عملت لا يساوي صفر عشان انا قلت لو id مش نفسه بتاعي خزن صفر طب لو بتاعي هخزن الداتا بتاعت likePostData في List عشان اعرضها في صفحه اللايكات
-                            child: Icon(Icons.favorite,color: cubit.likeStatusForMeOnSpecificPost == false ? Colors.grey : Colors.red,size: 22),
+                            onTap:()
+                            {
+                              setState((){
+                                if( cubit.likeStatusOnSpecificPostForSpecificUser == true )
+                                {
+                                  cubit.removeLike(postID: postID,context: context,postMakerID: model.userID!);
+                                  cubit.likeStatusOnSpecificPostForSpecificUser = false ;
+                                  LayoutCubit.getCubit(context).usersPostsData.clear();
+                                  LayoutCubit.getCubit(context).getUsersPosts();
+                                }
+                                else
+                                {
+                                  cubit.addLike(postID: postID,context: context,postMakerID: model.userID!);
+                                  cubit.likeStatusOnSpecificPostForSpecificUser = true ;   // لأن انا بلعب علي لو قيمتها لا تساوي صفر يبقي كده في قيمه
+                                  LayoutCubit.getCubit(context).usersPostsData.clear();
+                                  LayoutCubit.getCubit(context).getUsersPosts();
+                                }
+                              });
+                            },
+                            // عملت لا يساوي صفر عشان انا قلت لو id مش نفسه بتاعي خزن صفر طب لو بتاعي هخزن الداتا بتاعت likePostData في List عشان اعرضها في صفحه اللايكات
+                            child: Icon(Icons.favorite,color: cubit.likeStatusOnSpecificPostForSpecificUser == false ? Colors.grey : Colors.red,size: 22),
                           );
                         },
                       ),
                     ),
                     const SizedBox(width: 7,),
                     GestureDetector(
-                      onTap: ()
-                      {
-                        Navigator.push(context, MaterialPageRoute(builder: (context)=>LikesViewScreen(postID: postID, postMakerID: model.userID!)));
-                      },
+                        onTap: ()
+                        {
+                          Navigator.push(context, MaterialPageRoute(builder: (context)=>LikesViewScreen(postID: postID, postMakerID: model.userID!)));
+                        },
                         child: Text("like",style: Theme.of(context).textTheme.caption)),
                   ],
                 ),
@@ -251,7 +204,7 @@ class PostDetailsScreen extends StatelessWidget{
                       },
                       child: CircleAvatar(
                         radius: 15,
-                        backgroundImage: NetworkImage(LayoutCubit.getCubit(context).userData!.image!),
+                        backgroundImage: NetworkImage(SpecificUserCubit.getCubit(context).specificUserData!.image!),
                       ),
                     ),
                     const SizedBox(width: 10,),

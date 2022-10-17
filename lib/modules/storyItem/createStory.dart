@@ -71,7 +71,7 @@ class CreateStoryScreen extends StatelessWidget {
       child: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.only(left: 10,right: 5),
+            padding: const EdgeInsets.symmetric(horizontal: 12.0),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
@@ -97,6 +97,7 @@ class CreateStoryScreen extends StatelessWidget {
               ],
             ),
           ),
+          const SizedBox(height: 5,),
           if( cubit.storyImage != null )
             Expanded(
               child: Center(
@@ -105,7 +106,6 @@ class CreateStoryScreen extends StatelessWidget {
                   children: [
                     SizedBox(
                         child: Image(image: FileImage(cubit.storyImage!))
-                      // Image.network(cubit.postImageUrl!,fit: BoxFit.fitHeight,height: 250),
                     ),
                     GestureDetector(
                       onTap: ()
