@@ -9,7 +9,7 @@ Application features :
 - chat with specific User.
 - search for a user using his name. 
 - create stories on Profile Screen.
-- update my data.
+- update your data.
 - add | remove like.
 - add | remove comments.
 - get profile for specific User. 
