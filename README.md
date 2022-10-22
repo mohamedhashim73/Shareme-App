@@ -52,7 +52,7 @@ Story shown page
 
 ![Screenshot 2022-10-22 015319](https://user-images.githubusercontent.com/101535118/197306692-80cb05a5-f50c-4ad1-bc12-5ad1481fdad2.png)
 
-Open my Profile page 
+Profile page after click on my name on appBar 
 
 ![Screenshot 2022-10-22 015615](https://user-images.githubusercontent.com/101535118/197306713-de00bfbe-fdea-4948-912d-50d973129816.png)
 
