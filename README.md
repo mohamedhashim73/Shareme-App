@@ -64,4 +64,6 @@ Home screen with options for user like Update post | delete post
 
 ![Screenshot 2022-10-22 015649](https://user-images.githubusercontent.com/101535118/197306855-0369b4ca-be3f-4953-94f6-bda8abb37d14.png)
 
+Search screen before type user name 
+
 ![4](https://user-images.githubusercontent.com/101535118/197306877-ca84a4ee-1611-4be4-86d9-ec2ff66f09a4.png)
