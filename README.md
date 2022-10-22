@@ -62,6 +62,8 @@ Create post screen
 
 Home screen with options for user like Update post | delete post
 
+Create story
+
 ![Screenshot 2022-10-22 015649](https://user-images.githubusercontent.com/101535118/197306855-0369b4ca-be3f-4953-94f6-bda8abb37d14.png)
 
 Search screen before type user name 
