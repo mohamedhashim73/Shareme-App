@@ -56,13 +56,15 @@ Open my Profile page
 
 ![Screenshot 2022-10-22 015615](https://user-images.githubusercontent.com/101535118/197306713-de00bfbe-fdea-4948-912d-50d973129816.png)
 
-Create post screen
+Create post Screen
+
+![Screenshot 2022-10-22 015450](https://user-images.githubusercontent.com/101535118/197307797-b5a8a265-b45a-412b-922e-1a604cd7920c.png)
+
+Create Story Screen
 
 ![Screenshot 2022-10-22 015533](https://user-images.githubusercontent.com/101535118/197306851-a34e4188-92e4-4bc7-bf80-25f26c4cb083.png
 
 Home screen with options for user like Update post | delete post
-
-Create story
 
 ![Screenshot 2022-10-22 015649](https://user-images.githubusercontent.com/101535118/197306855-0369b4ca-be3f-4953-94f6-bda8abb37d14.png)
 
