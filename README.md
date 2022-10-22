@@ -32,7 +32,11 @@ open profile page for specific User
 
 ![Screenshot 2022-10-22 015253](https://user-images.githubusercontent.com/101535118/197306574-6d217816-e643-4914-a946-7f84751eac3d.png)
 
+post Details page
+
 ![Screenshot 2022-10-22 015336](https://user-images.githubusercontent.com/101535118/197306581-36e22c85-2d70-4f2d-9c15-e2b99e7f8f1c.png)
+
+update user Data
 
 ![Screenshot 2022-10-22 015147](https://user-images.githubusercontent.com/101535118/197306586-271f26d2-9baf-484c-8f10-2a19947e593c.png)
 
