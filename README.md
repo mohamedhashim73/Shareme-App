@@ -62,7 +62,7 @@ Create post Screen
 
 Create Story Screen
 
-![Screenshot 2022-10-22 015533](https://user-images.githubusercontent.com/101535118/197306851-a34e4188-92e4-4bc7-bf80-25f26c4cb083.png
+![Screenshot 2022-10-22 015533](https://user-images.githubusercontent.com/101535118/197307854-d1c66f8d-b03d-45e3-aa92-589664936602.png)
 
 Home screen with options for user like Update post | delete post
 
