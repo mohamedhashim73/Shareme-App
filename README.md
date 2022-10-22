@@ -14,7 +14,7 @@ Application features :
 - add | remove comments.
 - get profile for specific User. 
 
-photos from the App
+Photos from the App
 
 Sign In page
 
