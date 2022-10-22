@@ -28,5 +28,4 @@ photos from the App
 ![Screenshot 2022-10-22 015450](https://user-images.githubusercontent.com/101535118/197306835-76c5d09d-2055-4b58-9497-5bb091d696a9.png)
 ![Screenshot 2022-10-22 015533](https://user-images.githubusercontent.com/101535118/197306851-a34e4188-92e4-4bc7-bf80-25f26c4cb083.png)
 ![Screenshot 2022-10-22 015649](https://user-images.githubusercontent.com/101535118/197306855-0369b4ca-be3f-4953-94f6-bda8abb37d14.png)
-![Screenshot 2022-10-21 112710](https://user-images.githubusercontent.com/101535118/197306868-7b53e0fa-67f4-4a5d-9308-b54b4df2ffbf.png)
 ![4](https://user-images.githubusercontent.com/101535118/197306877-ca84a4ee-1611-4be4-86d9-ec2ff66f09a4.png)
