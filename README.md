@@ -28,19 +28,23 @@ Home Screen which have posts for all Users
 
 ![1](https://user-images.githubusercontent.com/101535118/197306559-50cd1b32-e4e2-418f-a369-9958307657de.png)
 
-open profile page for specific User
+Open profile page for specific User
 
 ![Screenshot 2022-10-22 015253](https://user-images.githubusercontent.com/101535118/197306574-6d217816-e643-4914-a946-7f84751eac3d.png)
 
-post Details page
+Post Details page
 
 ![Screenshot 2022-10-22 015336](https://user-images.githubusercontent.com/101535118/197306581-36e22c85-2d70-4f2d-9c15-e2b99e7f8f1c.png)
 
-update user Data
+Update user Data
 
 ![Screenshot 2022-10-22 015147](https://user-images.githubusercontent.com/101535118/197306586-271f26d2-9baf-484c-8f10-2a19947e593c.png)
 
+Chat with specific User
+
 ![Screenshot 2022-10-22 015433](https://user-images.githubusercontent.com/101535118/197306661-7bcdefa3-c7ce-4a82-8e73-05cd3c085abc.png)
+
+Search for specific User using his name
 
 ![Screenshot 2022-10-22 015516](https://user-images.githubusercontent.com/101535118/197306680-346e1dbb-92e9-4a41-b183-d1785d560125.png)
 
