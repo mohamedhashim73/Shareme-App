@@ -16,6 +16,10 @@ Application features :
 
 Photos from the App
 
+Image that cover App
+
+![12 (1)](https://user-images.githubusercontent.com/101535118/197365025-174cc183-020e-442f-a596-4e3d69993060.jpg)
+
 Sign In page
 
 ![Screenshot 2022-10-22 015707](https://user-images.githubusercontent.com/101535118/197306546-0cdbf53e-d8e6-4ad5-a21f-99245cb1b8ce.png)
