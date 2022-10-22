@@ -24,7 +24,11 @@ Sign Up page
 
 ![Screenshot 2022-10-22 015759](https://user-images.githubusercontent.com/101535118/197306550-fe58bd6e-217d-4358-8bc0-72b8996717ff.png)
 
+Home Screen which have posts for all Users 
+
 ![1](https://user-images.githubusercontent.com/101535118/197306559-50cd1b32-e4e2-418f-a369-9958307657de.png)
+
+open profile page for specific User
 
 ![Screenshot 2022-10-22 015253](https://user-images.githubusercontent.com/101535118/197306574-6d217816-e643-4914-a946-7f84751eac3d.png)
 
