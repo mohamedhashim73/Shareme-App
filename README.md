@@ -1,4 +1,4 @@
-# Shareme-App
+# Shareme Application
 Full Social Media App using Dart - Flutter - Firebase - Bloc - SharedPreferences.
 
 link for video that show How app work https://mostaql.com/portfolio/1118304
