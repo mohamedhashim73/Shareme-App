@@ -16,7 +16,7 @@ Application features :
 
 Photos from the App
 
-Image that cover App
+# Image that cover App
 
 
 ![1](https://user-images.githubusercontent.com/101535118/197813362-6fb6e54f-72da-491b-bd3a-cb9ff558cf1b.jpeg)
